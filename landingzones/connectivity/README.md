@@ -69,15 +69,52 @@ This section provides a clear, industry-aligned workflow for deploying the DevOp
    - Uploads plan as artifact
    - Runs post-apply security scan (tfsec)
 
-### Post-Deployment (Best Practices & Compliance)
-After deployment, ensure:
-- **State file is stored in the remote backend (Storage Account).**
-- **Secrets are stored in Key Vault, not in code or variables.**
-- **Diagnostics and logging are enabled for the VM and Storage Account (send to Log Analytics if possible).**
-- **NSGs restrict access to the DevOps agent VM.**
-- **VM uses managed identity if possible.**
-- **Monitor and backup the VM as required.**
-- **Review and remediate any issues found by tfsec or other security tools.**
+
+### Post-Deployment: Step-by-Step Operations
+After the deployment workflow completes, follow these steps to ensure your environment is secure, compliant, and operational:
+
+1. **Verify Remote State Storage**
+   - Confirm that the Terraform state file is present in the Storage Account container.
+   - Use the Azure Portal or CLI to check the blob in the container (e.g., `connectivity.terraform.tfstate`).
+
+2. **Validate Key Vault Secrets**
+   - Ensure all sensitive values (e.g., VM admin password) are stored as Key Vault secrets.
+   - Remove any hardcoded secrets from code, variables, or pipeline definitions.
+
+3. **Enable Diagnostics and Logging**
+   - Attach diagnostic settings to the VM and Storage Account to send logs to Log Analytics.
+   - Example for VM:
+     ```hcl
+     resource "azurerm_monitor_diagnostic_setting" "vm_diag" {
+       name                       = "vm-diagnostics"
+       target_resource_id         = azurerm_linux_virtual_machine.devops_agent.id
+       log_analytics_workspace_id = <log_analytics_workspace_id>
+       # ...log categories...
+     }
+     ```
+
+4. **Review Network Security**
+   - Confirm that Network Security Groups (NSGs) restrict access to the DevOps agent VM.
+   - Only allow required ports and trusted IPs.
+
+5. **Enable and Use Managed Identity (Recommended)**
+   - Update the VM to use a managed identity for secure access to Azure resources.
+   - Assign necessary roles to the managed identity.
+
+6. **Monitor and Backup the VM**
+   - Enable Azure Monitor alerts for VM health and performance.
+   - Set up backup policies if the agent VM is stateful or critical.
+
+7. **Review Security Scan Results**
+   - Check the results of tfsec and other security tools in the GitHub Actions run.
+   - Remediate any high or critical findings.
+
+8. **Document and Communicate**
+   - Update internal documentation with resource names, access patterns, and operational procedures.
+   - Notify stakeholders that the DevOps agent is ready for use.
+
+---
+By following these post-deployment steps, you ensure your environment is not only deployed, but also secure, compliant, and ready for production use.
 
 ## GitHub Actions Workflow Example
 See `.github/workflows/deploy-connectivity.yml` for a production-ready workflow. Key features:
