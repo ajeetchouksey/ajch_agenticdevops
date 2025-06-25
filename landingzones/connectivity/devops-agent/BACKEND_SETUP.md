@@ -34,9 +34,9 @@ Edit `backend.tf` in your Terraform directory:
 ```
 terraform {
   backend "azurerm" {
-    resource_group_name  = "tfstate-rg"
-    storage_account_name = "tfstate<unique>"
-    container_name       = "tfstate"
+    resource_group_name  = "dev-agentic-prod-rg"
+    storage_account_name = "devagenticprodstg"
+    container_name       = "statefiles"
     key                  = "devops-agent.terraform.tfstate"
   }
 }

@@ -77,7 +77,7 @@ This section provides a clear, industry-aligned workflow for deploying the DevOp
    ```
 4. **Commit and push your changes to GitHub.**
 5. **Trigger the GitHub Actions workflow** (`.github/workflows/deploy-connectivity.yml`) to automate deployment:
-   - Uses OIDC for secure authentication (no secrets in code)
+   - Uses Azure Service Principal authentication (client secret) for automation
    - Runs `terraform init`, `plan`, and `apply`
    - Uploads plan as artifact
    - Runs post-apply security scan (tfsec)
@@ -131,7 +131,7 @@ By following these post-deployment steps, you ensure your environment is not onl
 
 ## GitHub Actions Workflow Example
 See `.github/workflows/deploy-connectivity.yml` for a production-ready workflow. Key features:
-- OIDC authentication (no long-lived secrets)
+Service Principal authentication (client secret; secrets stored in GitHub)
 - Environment protection rules
 - Security scanning (tfsec)
 - Artifact upload for traceability

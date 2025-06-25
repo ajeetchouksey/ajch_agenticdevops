@@ -18,7 +18,7 @@ on:
       - '.github/workflows/deploy-connectivity.yml'
 
 permissions:
-  id-token: write # For OIDC authentication
+  # id-token: write # Removed OIDC authentication, not needed for Service Principal
   contents: read
 
 jobs:

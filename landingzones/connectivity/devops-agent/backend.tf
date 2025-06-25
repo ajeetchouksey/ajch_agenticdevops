@@ -4,9 +4,9 @@
 
 terraform {
   backend "azurerm" {
-    resource_group_name  = "<storage-rg>"         // Update with your storage RG
-    storage_account_name = "<storageaccountname>" // Update with your storage account
-    container_name       = "tfstate"              // Update if you use a different container
+    resource_group_name  = "dev-agentic-prod-rg"         // Updated for statefiles backend
+    storage_account_name = "devagenticprodstg"           // Updated for statefiles backend
+    container_name       = "statefiles"                  // Updated for statefiles backend
     key                  = "devops-agent.terraform.tfstate"
   }
 }
