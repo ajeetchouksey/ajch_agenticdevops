@@ -13,20 +13,32 @@ resource "azurerm_network_security_group" "this" {
   tags                = try(each.value.tags, {})
 }
 
+locals {
+  nsg_rules_flat = merge([
+    for nsg_key, nsg in var.nsgs :
+      length(try(nsg.rules, [])) > 0 ? {
+        for rule_idx, rule in nsg.rules :
+          "${nsg_key}.${rule_idx}" => {
+            nsg_key = nsg_key
+            rule    = rule
+          }
+      } : {}
+  ]...)
+}
+
 resource "azurerm_network_security_rule" "rule" {
-  for_each = { for nsg_key, nsg in var.nsgs : nsg_key => nsg if length(try(nsg.rules, [])) > 0 }
-  count    = length(try(var.nsgs[each.key].rules, []))
-  name                        = var.nsgs[each.key].rules[count.index].name
-  priority                    = var.nsgs[each.key].rules[count.index].priority
-  direction                   = var.nsgs[each.key].rules[count.index].direction
-  access                      = var.nsgs[each.key].rules[count.index].access
-  protocol                    = var.nsgs[each.key].rules[count.index].protocol
-  source_port_range           = var.nsgs[each.key].rules[count.index].source_port_range
-  destination_port_range      = var.nsgs[each.key].rules[count.index].destination_port_range
-  source_address_prefix       = var.nsgs[each.key].rules[count.index].source_address_prefix
-  destination_address_prefix  = var.nsgs[each.key].rules[count.index].destination_address_prefix
-  network_security_group_name = azurerm_network_security_group.this[each.key].name
-  resource_group_name         = azurerm_network_security_group.this[each.key].resource_group_name
+  for_each = local.nsg_rules_flat
+  name                        = each.value.rule.name
+  priority                    = each.value.rule.priority
+  direction                   = each.value.rule.direction
+  access                      = each.value.rule.access
+  protocol                    = each.value.rule.protocol
+  source_port_range           = each.value.rule.source_port_range
+  destination_port_range      = each.value.rule.destination_port_range
+  source_address_prefix       = each.value.rule.source_address_prefix
+  destination_address_prefix  = each.value.rule.destination_address_prefix
+  network_security_group_name = azurerm_network_security_group.this[each.value.nsg_key].name
+  resource_group_name         = azurerm_network_security_group.this[each.value.nsg_key].resource_group_name
 }
 
 // Output: Map of NSG resource IDs
