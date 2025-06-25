@@ -54,7 +54,44 @@ Clear boundaries between modules and landing zones make it easier for teams to c
 - **Scalability:** Add new landing zones or applications by creating new folders under `landingzones/`.
 - **Compliance:** Structure supports policy-as-code, RBAC, and secure state management.
 
-## Getting Started
+## Core Modules and Resource Placement
+
+This section explains what resources are typically included in each core module and what should be managed outside of them. Use this as a reference when designing or extending your landing zones.
+
+### core-modules/network
+- Virtual networks (VNet)
+- Subnets
+- Network security groups (NSG)
+- Route tables
+- Network peerings
+- Private endpoints
+
+### core-modules/identity
+- Azure Active Directory (AAD) applications
+- Service principals
+- Managed identities (user-assigned/system-assigned)
+- Role assignments (for identities)
+- Key Vault access policies (if related to identity)
+
+### core-modules/management
+- Management groups
+- Policy definitions and assignments
+- Initiative definitions and assignments
+- Resource locks
+- Diagnostic settings (for logging/monitoring)
+- Log Analytics workspaces
+- Automation accounts (for governance tasks)
+- Cost management resources
+
+### What goes outside these modules?
+- **Resource group creation:** Should be its own module (e.g., `core-modules/resource-group`) for reusability.
+- **Application-specific resources:** (e.g., App Service, SQL DB, Storage Account for a specific app) should be defined in the relevant landing zone.
+- **Landing zone orchestration:** The `main.tf` in each landing zone folder, which calls the core modules and wires them together.
+- **Environment-specific configuration:** Variables, backend, outputs, etc., should be managed in the landing zone folders.
+
+This separation keeps each module focused and reusable, while the landing zone folders orchestrate the deployment for a specific scenario or environment.
+
+---
 1. Clone the repository.
 2. Navigate to a landing zone folder (e.g., `landingzones/management`).
 3. Configure your backend (e.g., `backend.tf`) and variables as needed.
