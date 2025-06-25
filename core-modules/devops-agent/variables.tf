@@ -1,35 +1,41 @@
-// Name of the DevOps agent VM
+
+// -----------------------------------------------------------------------------
+// Input Variables for Azure DevOps Agent Module
+// -----------------------------------------------------------------------------
+
 variable "agent_name" {
   description = "The name of the Azure DevOps agent virtual machine."
+  type        = string
 }
 
-// Azure region for deployment
 variable "location" {
   description = "The Azure region where the resources will be deployed."
+  type        = string
 }
 
-// Resource group for the VM and NIC
 variable "resource_group_name" {
   description = "The name of the resource group in which to create the resources."
+  type        = string
 }
 
-// VM size (SKU)
 variable "vm_size" {
-  description = "The size of the virtual machine."
+  description = "The size (SKU) of the virtual machine."
+  type        = string
   default     = "Standard_B2ms"
 }
 
-// Admin username for the VM
 variable "admin_username" {
   description = "The admin username for the virtual machine."
+  type        = string
 }
 
-// Admin password for the VM
 variable "admin_password" {
   description = "The admin password for the virtual machine."
+  type        = string
+  sensitive   = true
 }
 
-// Subnet ID for the NIC
 variable "subnet_id" {
   description = "The subnet ID where the network interface will be created."
+  type        = string
 }
