@@ -1,4 +1,3 @@
-
 // -----------------------------------------------------------------------------
 // Main entry for DevOps Agent deployment in Connectivity Landing Zone
 // This composition file wires together modular core network and agent modules.
@@ -34,7 +33,10 @@ resource "azurerm_subnet_network_security_group_association" "agent" {
 // Deploy the Azure DevOps Agent VM in the created subnet
 module "devops_agent" {
   source              = "../../../core-modules/devops-agent"
-  agent_name          = var.agent_name
+  agent_name          = local.agent_name
+  subscription_code   = var.subscription_code
+  project             = var.project
+  env                 = var.env
   location            = var.location
   resource_group_name = var.resource_group_name
   vm_size             = var.vm_size

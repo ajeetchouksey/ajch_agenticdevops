@@ -8,7 +8,7 @@
 
 // Network Interface for the DevOps agent VM
 resource "azurerm_network_interface" "devops_agent_nic" {
-  name                = "${var.agent_name}-nic"         // NIC name
+  name                = local.nic_name                  // NIC name from naming convention
   location            = var.location                    // Azure region
   resource_group_name = var.resource_group_name         // Resource group
 
@@ -21,7 +21,7 @@ resource "azurerm_network_interface" "devops_agent_nic" {
 
 // Linux Virtual Machine for the DevOps agent
 resource "azurerm_linux_virtual_machine" "devops_agent" {
-  name                = var.agent_name                  // VM name
+  name                = local.agent_name_final           // VM name from naming convention
   location            = var.location                    // Azure region
   resource_group_name = var.resource_group_name         // Resource group
   size                = var.vm_size                     // VM size (SKU)

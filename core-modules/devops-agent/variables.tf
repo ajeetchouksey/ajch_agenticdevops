@@ -1,3 +1,20 @@
+variable "subscription_code" {
+  description = "Short code or abbreviation for the Azure subscription (e.g., dev01, prod02). Used for naming convention."
+  type        = string
+  default     = null
+}
+
+variable "project" {
+  description = "Project or workload name for naming convention."
+  type        = string
+  default     = null
+}
+
+variable "env" {
+  description = "Environment name for naming convention (e.g., dev, prod)."
+  type        = string
+  default     = null
+}
 
 // -----------------------------------------------------------------------------
 // Input Variables for Azure DevOps Agent Module
