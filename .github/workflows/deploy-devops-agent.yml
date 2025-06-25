@@ -61,19 +61,7 @@ jobs:
           name: devops-agent-tfplan
           path: landingzones/connectivity/devops-agent/tfplan
 
-      - name: Analyze Build/Test/Deploy Times
-        uses: mikepenz/gh-action-timings@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: GitHub Copilot CI (Pipeline Recommendations)
-        uses: github/copilot-actions@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      # Timing analysis using github-script (logs step start/end times)
+  
       - name: Log Start Time
         id: start_time
         uses: actions/github-script@v7
