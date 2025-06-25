@@ -1,3 +1,58 @@
+variable "subscription_code" {
+  description = "Short code or abbreviation for the Azure subscription (e.g., dev01, prod02)."
+  type        = string
+}
+variable "vnets" {
+  description = "A map of VNet definitions for the vnet module."
+  type = map(object({
+    name                = string
+    address_space       = list(string)
+    location            = string
+    resource_group_name = string
+    tags                = optional(map(string), {})
+  }))
+}
+
+variable "subnets" {
+  description = "A map of subnet definitions for the subnet module."
+  type = map(object({
+    name                 = string
+    resource_group_name  = string
+    virtual_network_name = string
+    address_prefixes     = list(string)
+    tags                 = optional(map(string), {})
+  }))
+}
+
+variable "nsgs" {
+  description = "A map of NSG definitions for the nsg module."
+  type = map(object({
+    name                = string
+    location            = string
+    resource_group_name = string
+    tags                = optional(map(string), {})
+    rules = optional(list(object({
+      name                       = string
+      priority                   = number
+      direction                  = string
+      access                     = string
+      protocol                   = string
+      source_port_range          = string
+      destination_port_range     = string
+      source_address_prefix      = string
+      destination_address_prefix = string
+    })), [])
+  }))
+}
+variable "project" {
+  description = "Short name for the workload, app, or landing zone (e.g., devops, mgmt, app, avd)"
+  type        = string
+}
+
+variable "env" {
+  description = "Environment (e.g., dev, test, prod, shared)"
+  type        = string
+}
 
 // -----------------------------------------------------------------------------
 // Input Variables for DevOps Agent Deployment in Connectivity Landing Zone
