@@ -1,6 +1,47 @@
+> **Recommended Production Structure:**
+> 
+> For production or large-scale environments, use multiple repositories to separate core modules and landing zone orchestration. This approach provides better versioning, security, collaboration, and reuse. A typical structure is:
+> 
+> - **Core Module Repositories:**
+>   - `terraform-modules-network` (networking resources)
+>   - `terraform-modules-identity` (identity resources)
+>   - `terraform-modules-management` (management/governance resources)
+>   - (Add more as needed: e.g., storage, keyvault)
+> 
+> - **Landing Zone Repositories:**
+>   - `landingzone-management`
+>   - `landingzone-connectivity`
+>   - `landingzone-avd`
+>   - `landingzone-application`
+>   - (Add more as needed for each environment or scenario)
+> 
+> - **Example Directory Layout:**
+>   ```
+>   github.com/your-org/
+>     terraform-modules-network/
+>     terraform-modules-identity/
+>     terraform-modules-management/
+>     landingzone-management/
+>     landingzone-connectivity/
+>     landingzone-application/
+>   ```
+> 
+> - **Module Reference Example (in landing zone repo):**
+>   ```hcl
+>   module "network" {
+>     source  = "git::https://github.com/your-org/terraform-modules-network.git?ref=v1.0.0"
+>     # ...module variables...
+>   }
+>   ```
+> 
+> This structure enables teams to work independently, reuse modules across projects, and maintain a secure, scalable, and compliant IaC environment.
 # Azure Landing Zone Terraform Playground
 
+
 This repository is designed as a playground for learning and deploying Azure Landing Zones using Terraform and agentic DevOps practices. It follows industry best practices for modularity, compliance, and environment separation.
+
+> **Recommendation:**
+> In production or large-scale environments, it is best practice to separate core modules and landing zone orchestration into multiple repositories. This enables better versioning, security, collaboration, and reuse. For learning and experimentation, a single monorepo (like this one) is perfectly fine and makes it easier to explore and iterate quickly.
 
 ## Repository Structure
 
