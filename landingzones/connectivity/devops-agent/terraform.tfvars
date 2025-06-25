@@ -1,9 +1,5 @@
-vnet_name             = "vnet-devops-connectivity"
 vnet_address_space    = ["10.10.0.0/16"]
-subnet_name           = "snet-devops-agent"
 subnet_address_prefixes = ["10.10.1.0/24"]
-nsg_name              = "nsg-devops-agent"
-agent_name          = "devops-agent-01"
 location            = "<your-region>"
 resource_group_name = "<your-resource-group>"
 vm_size             = "Standard_B2ms"
