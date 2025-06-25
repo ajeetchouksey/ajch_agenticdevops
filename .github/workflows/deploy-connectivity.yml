@@ -18,7 +18,7 @@ on:
       - '.github/workflows/deploy-connectivity.yml'
 
 permissions:
-  # id-token: write # Removed OIDC authentication, not needed for Service Principal
+  # id-token: write # OIDC authentication removed; Service Principal only
   contents: read
 
 jobs:
@@ -37,6 +37,7 @@ jobs:
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
