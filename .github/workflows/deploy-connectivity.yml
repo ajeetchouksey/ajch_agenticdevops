@@ -8,6 +8,12 @@ on:
   push:
     paths:
       - 'landingzones/connectivity/**'
+    # Exclude devops-agent subfolder to avoid double deployment
+    # Only deploy remaining connectivity resources
+    # (devops-agent handled by its own workflow)
+    # If your runner supports it, use:
+    # paths-ignore:
+    #   - 'landingzones/connectivity/devops-agent/**'
       - 'core-modules/**'
       - '.github/workflows/deploy-connectivity.yml'
 
@@ -39,15 +45,16 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Terraform Init
-        run: terraform -chdir=landingzones/connectivity init
 
-      - name: Terraform Plan
-        run: terraform -chdir=landingzones/connectivity plan -out=tfplan
+      - name: Terraform Init (Connectivity)
+        run: terraform -chdir=landingzones/connectivity init -backend-config="key=connectivity.terraform.tfstate"
 
-      - name: Terraform Apply
+      - name: Terraform Plan (Connectivity)
+        run: terraform -chdir=landingzones/connectivity plan -out=connectivity-tfplan
+
+      - name: Terraform Apply (Connectivity)
         if: github.ref == 'refs/heads/main'
-        run: terraform -chdir=landingzones/connectivity apply -auto-approve tfplan
+        run: terraform -chdir=landingzones/connectivity apply -auto-approve connectivity-tfplan
 
       - name: Post-Apply Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
@@ -57,5 +64,5 @@ jobs:
       - name: Upload Terraform Plan as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan
-          path: landingzones/connectivity/tfplan
+          name: connectivity-tfplan
+          path: landingzones/connectivity/connectivity-tfplan

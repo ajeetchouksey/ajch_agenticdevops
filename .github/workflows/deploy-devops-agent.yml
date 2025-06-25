@@ -1,0 +1,62 @@
+# GitHub Actions Workflow: Deploy DevOps Agent Resources
+# Uses Microsoft-hosted agent for deployment
+# Follows industry best practices for naming and security
+
+name: 'Deploy DevOps Agent Resources'
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'landingzones/connectivity/DEVOPS_AGENT_DEPLOYMENT.md'
+      - 'core-modules/devops-agent/**'
+      - '.github/workflows/deploy-devops-agent.yml'
+
+permissions:
+  id-token: write # For OIDC authentication
+  contents: read
+
+jobs:
+  deploy_devops_agent:
+    name: 'Deploy DevOps Agent'
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Azure CLI
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform Init (DevOps Agent)
+        run: terraform -chdir=landingzones/connectivity/devops-agent init
+
+      - name: Terraform Plan (DevOps Agent)
+        run: terraform -chdir=landingzones/connectivity/devops-agent plan -out=tfplan
+
+      - name: Terraform Apply (DevOps Agent)
+        if: github.ref == 'refs/heads/main'
+        run: terraform -chdir=landingzones/connectivity/devops-agent apply -auto-approve tfplan
+
+      - name: Post-Apply Security Scan
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: landingzones/connectivity/devops-agent
+
+      - name: Upload Terraform Plan as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: devops-agent-tfplan
+          path: landingzones/connectivity/devops-agent/tfplan

@@ -1,0 +1,7 @@
+agent_name          = "devops-agent-01"
+location            = "<your-region>"
+resource_group_name = "<your-resource-group>"
+vm_size             = "Standard_B2ms"
+admin_username      = "<admin-user>"
+admin_password      = "<admin-password>"
+subnet_id           = "<subnet-resource-id>"
