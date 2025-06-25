@@ -1,31 +1,22 @@
-variable "tags" {
-  description = "A map of tags to assign to the NSG."
-  type        = map(string)
-  default     = {}
-}
-
-variable "allow_ssh" {
-  description = "Whether to allow SSH (port 22) inbound."
-  type        = bool
-  default     = false
-}
-
-variable "allowed_ssh_source" {
-  description = "Source IP CIDR(s) allowed for SSH."
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-}
-
-variable "allow_rdp" {
-  description = "Whether to allow RDP (port 3389) inbound."
-  type        = bool
-  default     = false
-}
-
-variable "allowed_rdp_source" {
-  description = "Source IP CIDR(s) allowed for RDP."
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
+variable "nsgs" {
+  description = "A map of NSG definitions. Each value is an object with keys: name, location, resource_group_name, tags, rules (list of rule objects)."
+  type = map(object({
+    name                = string
+    location            = string
+    resource_group_name = string
+    tags                = optional(map(string), {})
+    rules = optional(list(object({
+      name                       = string
+      priority                   = number
+      direction                  = string
+      access                     = string
+      protocol                   = string
+      source_port_range          = string
+      destination_port_range     = string
+      source_address_prefix      = string
+      destination_address_prefix = string
+    })), [])
+  }))
 }
 
 // -----------------------------------------------------------------------------

@@ -8,22 +8,13 @@ variable "tags" {
 // Input Variables for Subnet Module
 // -----------------------------------------------------------------------------
 
-variable "name" {
-  description = "The name of the Azure subnet."
-  type        = string
-}
-
-variable "resource_group_name" {
-  description = "The name of the resource group in which to create the subnet."
-  type        = string
-}
-
-variable "virtual_network_name" {
-  description = "The name of the parent Virtual Network (VNet) for the subnet."
-  type        = string
-}
-
-variable "address_prefixes" {
-  description = "A list of address prefixes (CIDR blocks) for the subnet."
-  type        = list(string)
+variable "subnets" {
+  description = "A map of subnet definitions. Each value is an object with keys: name, resource_group_name, virtual_network_name, address_prefixes, tags."
+  type = map(object({
+    name                 = string
+    resource_group_name  = string
+    virtual_network_name = string
+    address_prefixes     = list(string)
+    tags                 = optional(map(string), {})
+  }))
 }

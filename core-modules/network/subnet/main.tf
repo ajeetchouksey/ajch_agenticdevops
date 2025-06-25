@@ -6,20 +6,22 @@
 // -----------------------------------------------------------------------------
 
 resource "azurerm_subnet" "this" {
-  name                 = var.name                 // Name of the subnet
-  resource_group_name  = var.resource_group_name  // Resource group for the subnet
-  virtual_network_name = var.virtual_network_name // Name of the parent VNet
-  address_prefixes     = var.address_prefixes     // List of address prefixes (CIDR blocks)
+  for_each             = var.subnets
+  name                 = each.value.name
+  resource_group_name  = each.value.resource_group_name
+  virtual_network_name = each.value.virtual_network_name
+  address_prefixes     = each.value.address_prefixes
+  # tags not supported by azurerm_subnet as of now
 }
 
-// Output: Subnet resource ID for referencing in other modules
-output "subnet_id" {
-  description = "The resource ID of the created subnet."
-  value       = azurerm_subnet.this.id
+// Output: Map of Subnet resource IDs
+output "subnet_ids" {
+  description = "A map of Subnet resource IDs, keyed by subnet key."
+  value       = { for k, v in azurerm_subnet.this : k => v.id }
 }
 
-// Output: Subnet name for downstream modules
-output "subnet_name" {
-  description = "The name of the created subnet."
-  value       = azurerm_subnet.this.name
+// Output: Map of Subnet names
+output "subnet_names" {
+  description = "A map of Subnet names, keyed by subnet key."
+  value       = { for k, v in azurerm_subnet.this : k => v.name }
 }

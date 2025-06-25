@@ -6,21 +6,22 @@
 // -----------------------------------------------------------------------------
 
 resource "azurerm_virtual_network" "this" {
-  name                = var.name                 // Name of the VNet
-  address_space       = var.address_space        // List of address spaces (CIDR blocks)
-  location            = var.location             // Azure region
-  resource_group_name = var.resource_group_name  // Resource group for the VNet
-  tags                = var.tags                 // Tags for governance/compliance
+  for_each            = var.vnets
+  name                = each.value.name
+  address_space       = each.value.address_space
+  location            = each.value.location
+  resource_group_name = each.value.resource_group_name
+  tags                = try(each.value.tags, {})
 }
 
-// Output: VNet resource ID for referencing in other modules
-output "vnet_id" {
-  description = "The resource ID of the created Virtual Network."
-  value       = azurerm_virtual_network.this.id
+// Output: Map of VNet resource IDs
+output "vnet_ids" {
+  description = "A map of VNet resource IDs, keyed by VNet key."
+  value       = { for k, v in azurerm_virtual_network.this : k => v.id }
 }
 
-// Output: VNet name for downstream modules
-output "vnet_name" {
-  description = "The name of the created Virtual Network."
-  value       = azurerm_virtual_network.this.name
+// Output: Map of VNet names
+output "vnet_names" {
+  description = "A map of VNet names, keyed by VNet key."
+  value       = { for k, v in azurerm_virtual_network.this : k => v.name }
 }
