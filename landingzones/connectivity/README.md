@@ -45,33 +45,53 @@ This section provides a clear, industry-aligned workflow for deploying the DevOp
      }
    }
    ```
-2. **Migrate state to remote backend:**
-   Follow these steps to safely move your Terraform state from the local backend to the remote backend (Storage Account):
 
-   **a. Add the backend configuration**
-   - Create or update a `backend.tf` file with the remote backend settings (see above).
+2. **Move State File from Local Backend to Remote Storage (Step-by-Step):**
 
-   **b. Run Terraform init with migration flag**
+   To safely migrate your Terraform state from the local backend to remote Azure Storage, follow these steps:
+
+   **Step 1: Complete Initial Deployment with Local Backend**
+   - Run `terraform init` and `terraform apply` as usual. Your state file (`terraform.tfstate`) will be stored locally.
+
+   **Step 2: Add Remote Backend Configuration**
+   - Create or update a file named `backend.tf` in your working directory with the following content (replace placeholders):
+     ```hcl
+     terraform {
+       backend "azurerm" {
+         resource_group_name  = "<resource-group>"
+         storage_account_name = "<storage-account>"
+         container_name       = "tfstate"
+         key                  = "connectivity.terraform.tfstate"
+       }
+     }
+     ```
+
+   **Step 3: Migrate State to Remote Backend**
    - In your terminal, run:
      ```sh
      terraform init -migrate-state
      ```
-   - Terraform will detect the backend change and prompt you to confirm migration.
-   - Type `yes` when prompted to move your state file to the remote backend.
+   - Terraform will detect the backend change and prompt you to migrate your state.
+   - Type `yes` when prompted. Terraform will upload your local `terraform.tfstate` to the specified Azure Storage container.
 
-   **c. Verify migration**
-   - After migration, check the Azure Storage Account container to ensure the `.tfstate` file is present.
-   - You can also run:
+   **Step 4: Verify Migration**
+   - Check your Azure Storage Account container for the `.tfstate` file.
+   - Run:
      ```sh
      terraform state list
      ```
-     to confirm your resources are still tracked.
+     to ensure all resources are still tracked.
 
-   **d. Clean up**
-   - Remove any local `.tfstate` and `.tfstate.backup` files to avoid confusion.
+   **Step 5: Clean Up Local State Files**
+   - Delete any local `terraform.tfstate` and `terraform.tfstate.backup` files to avoid confusion.
 
-   **e. Commit and push changes**
-   - Commit your updated backend configuration and push to your remote repository.
+   **Step 6: Commit and Push Backend Changes**
+   - Commit your new/updated `backend.tf` to version control and push to your remote repository.
+
+   **Step 7: For All Future Deployments**
+   - Always keep the `backend.tf` file with the remote backend configuration in your repo.
+   - When running `terraform init`, Terraform will automatically use the remote backend.
+   - All state changes will be stored in Azure Storage, supporting collaboration, locking, and security.
 3. **Update your `main.tf` to deploy the DevOps agent using the module and Key Vault secret:**
    ```hcl
    module "devops_agent" {
