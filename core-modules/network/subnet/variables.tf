@@ -1,3 +1,8 @@
+variable "tags" {
+  description = "A map of tags to assign to the subnet."
+  type        = map(string)
+  default     = {}
+}
 
 // -----------------------------------------------------------------------------
 // Input Variables for Subnet Module

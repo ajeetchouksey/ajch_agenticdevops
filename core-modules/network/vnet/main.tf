@@ -10,6 +10,7 @@ resource "azurerm_virtual_network" "this" {
   address_space       = var.address_space        // List of address spaces (CIDR blocks)
   location            = var.location             // Azure region
   resource_group_name = var.resource_group_name  // Resource group for the VNet
+  tags                = var.tags                 // Tags for governance/compliance
 }
 
 // Output: VNet resource ID for referencing in other modules
