@@ -21,6 +21,14 @@ jobs:
     name: 'Deploy DevOps Agent'
     runs-on: ubuntu-latest
     environment: production
+    env:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+      AZURE_STORAGE_CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
+      AZURE_STORAGE_ACCESS_KEY: ${{ secrets.AZURE_STORAGE_ACCESS_KEY }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     defaults:
       run:
         shell: bash
@@ -39,15 +47,40 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Terraform Init (DevOps Agent)
-        run: terraform -chdir=landingzones/connectivity/devops-agent init
+      - name: Terraform Init
+        id: init
+        working-directory: landingzones/connectivity/devops-agent
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          RESOURCE_GROUP: ${{ secrets.AZURE_STORAGE_RESOURCE_GROUP }}
+          STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+          STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCESS_KEY }}
+          CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
+        run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP" -backend-config="key=cnt.tfstate"
+     
+      - name: Terraform Plan
+        id: plan
+        working-directory: landingzones/connectivity/devops-agent
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: terraform plan -var 'environment=p' -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}'
 
-      - name: Terraform Plan (DevOps Agent)
-        run: terraform -chdir=landingzones/connectivity/devops-agent plan -out=tfplan
-
-      - name: Terraform Apply (DevOps Agent)
+      - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
-        run: terraform -chdir=landingzones/connectivity/devops-agent apply -auto-approve tfplan
+        id: apply
+        working-directory: landingzones/connectivity/devops-agent
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: terraform apply -auto-approve -var 'environment=p' -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}'
 
       - name: Post-Apply Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
