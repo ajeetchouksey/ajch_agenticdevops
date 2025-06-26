@@ -1,3 +1,6 @@
+terraform {
+  backend "azurerm" {}
+}
 
 variable "environment" {
   description = "The environment for deployment (e.g., dev, prod, p)"
