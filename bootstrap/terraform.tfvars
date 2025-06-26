@@ -1,1 +1,8 @@
-# moved from landingzones/connectivity/devops-agent/terraform.tfvars
+
+environment = "prod"
+location    = "eastus"
+owner       = "admin"
+tags = {
+  Owner       = "admin"
+  Environment = "prod"
+}
