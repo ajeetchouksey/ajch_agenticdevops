@@ -1,8 +1,6 @@
 # moved from landingzones/connectivity/devops-agent/backend.tf
 
-terraform {
-  backend "azurerm" {}
-}
+
 
 variable "environment" {
   description = "The environment for deployment (e.g., dev, prod, p)"
