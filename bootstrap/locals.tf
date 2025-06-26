@@ -15,7 +15,7 @@ locals {
   resource_groups = [
     {
       name     = "${local.env}-${local.service_prefix}-${local.rg_prefix}-01"
-      location = var.location
+      location = "westeurope"
       tags     = local.tags
     },
     # Example for additional resource group:
