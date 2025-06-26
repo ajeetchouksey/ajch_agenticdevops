@@ -1,10 +1,4 @@
 
-variable "environment" {
-  description = "The environment for deployment (e.g., dev, prod, test)"
-  type        = string
-  default     = "prod"
-}
-
 variable "location" {
   description = "The Azure region for resource deployment."
   type        = string
