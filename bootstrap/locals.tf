@@ -9,6 +9,7 @@ locals {
   # Environment and owner from variables
   env   = var.environment
   owner = var.owner
+ // resource_type = "Microsoft.Resources/resourceGroups"
   tags  = var.tags
 
   # List of resource groups for module input
