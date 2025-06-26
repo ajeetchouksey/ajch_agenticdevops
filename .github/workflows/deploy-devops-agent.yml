@@ -8,8 +8,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'landingzones/connectivity/DEVOPS_AGENT_DEPLOYMENT.md'
-      - 'core-modules/devops-agent/**'
+      - 'bootstrap/**'
       - '.github/workflows/deploy-devops-agent.yml'
 
 permissions:
@@ -49,7 +48,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        working-directory: landingzones/connectivity/devops-agent
+        working-directory: bootstrap
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -63,7 +62,7 @@ jobs:
      
       - name: Terraform Plan
         id: plan
-        working-directory: landingzones/connectivity/devops-agent
+        working-directory: bootstrap
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -74,7 +73,7 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         id: apply
-        working-directory: landingzones/connectivity/devops-agent
+        working-directory: bootstrap
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -85,13 +84,13 @@ jobs:
       - name: Post-Apply Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
-          working_directory: landingzones/connectivity/devops-agent
+          working_directory: bootstrap
 
       - name: Upload Terraform Plan as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: devops-agent-tfplan
-          path: landingzones/connectivity/devops-agent/tfplan
+          path: bootstrap/tfplan
 
   
       - name: Log Start Time
