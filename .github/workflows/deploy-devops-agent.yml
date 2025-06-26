@@ -59,7 +59,7 @@ jobs:
           STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
           STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCESS_KEY }}
           CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
-        run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP" -backend-config="key=cnt.tfstate"
+        run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP" -backend-config="key=adoagent.tfstate" -backend-config="access_key=$STORAGE_ACCOUNT_KEY"
      
       - name: Terraform Plan
         id: plan
