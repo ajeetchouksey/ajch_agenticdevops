@@ -1,0 +1,85 @@
+# GitHub Actions Workflow: Deploy DevOps Agent Resources
+# Uses Microsoft-hosted agent for deployment
+# Follows industry best practices for naming and security
+
+name: 'Deploy DevOps Agent Resources'
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'landingzones/connectivity/DEVOPS_AGENT_DEPLOYMENT.md'
+      - 'core-modules/devops-agent/**'
+      - '.github/workflows/deploy-devops-agent.yml'
+
+permissions:
+  # id-token: write # Removed OIDC authentication, not needed for Service Principal
+  contents: read
+
+jobs:
+  deploy_devops_agent:
+    name: 'Deploy DevOps Agent'
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login action
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform Init (DevOps Agent)
+        run: terraform -chdir=landingzones/connectivity/devops-agent init
+
+      - name: Terraform Plan (DevOps Agent)
+        run: terraform -chdir=landingzones/connectivity/devops-agent plan -out=tfplan
+
+      - name: Terraform Apply (DevOps Agent)
+        if: github.ref == 'refs/heads/main'
+        run: terraform -chdir=landingzones/connectivity/devops-agent apply -auto-approve tfplan
+
+      - name: Post-Apply Security Scan
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: landingzones/connectivity/devops-agent
+
+      - name: Upload Terraform Plan as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: devops-agent-tfplan
+          path: landingzones/connectivity/devops-agent/tfplan
+
+  
+      - name: Log Start Time
+        id: start_time
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const start = new Date().toISOString();
+            core.setOutput('start', start);
+
+      - name: Log End Time and Duration
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const start = new Date(process.env.START_TIME || '');
+            const end = new Date();
+            const duration = (end - start) / 1000;
+            core.info(`Pipeline duration: ${duration} seconds`);
+        env:
+          START_TIME: ${{ steps.start_time.outputs.start }}
+
+      # Note: Copilot/AI pipeline recommendations are not available as a workflow action yet.
+      # Use Copilot in your editor for YAML and code suggestions.
