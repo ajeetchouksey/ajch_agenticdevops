@@ -1,16 +1,28 @@
 
 # Naming convention locals for bootstrap
 locals {
-  rg_prefix  = "rg"
-  law_prefix = "log"
+  # Naming convention prefixes
+  rg_prefix       = "rg"
+  law_prefix      = "log"
+  service_prefix  = "devops"
 
-  # Use variables for environment and owner
+  # Environment and owner from variables
   env   = var.environment
   owner = var.owner
   tags  = var.tags
 
-  # Resource group naming
-  rg_name = "${local.rg_prefix}-${local.env}-01"
-
-  # Add more resource naming conventions as needed
+  # List of resource groups for module input
+  resource_groups = [
+    {
+      name     = "${local.env}-${local.service_prefix}-${local.rg_prefix}-01"
+      location = var.location
+      tags     = local.tags
+    },
+    # Example for additional resource group:
+    # {
+    #   name     = "${local.env}-${local.service_prefix}-${local.rg_prefix}-02"
+    #   location = "westeurope"
+    #   tags     = local.tags
+    # }
+  ]
 }
