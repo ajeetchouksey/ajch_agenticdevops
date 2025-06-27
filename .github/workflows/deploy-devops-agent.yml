@@ -35,19 +35,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Initialize CodeQL for code scanning
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: 'python, javascript'  # Add or change languages as needed
-
-      # Autobuild (for supported languages)
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      # Run CodeQL Analysis
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+      # ...existing code...
 
       - name: Azure Login action
         uses: azure/login@v2
@@ -94,6 +82,13 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         run: terraform apply -auto-approve -var 'environment=p' -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}'
+
+      - name: Checkov Security Scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: bootstrap
+          framework: terraform
+          quiet: true
 
       - name: Post-Apply Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
