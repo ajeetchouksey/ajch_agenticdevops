@@ -33,7 +33,7 @@ def ai_review(diff):
     payload = {
         "model": "gpt-4",
         "messages": [
-            {"role": "system", "content": "You are a code reviewer. Suggest improvements and flag security issues."},
+            {"role": "system", "content": "You are a code reviewer. Suggest improvements, flag security issues, and at the end, clearly state if this PR is a candidate for approval or not (e.g., 'Candidate for approval: Yes' or 'Candidate for approval: No')."},
             {"role": "user", "content": diff}
         ]
     }

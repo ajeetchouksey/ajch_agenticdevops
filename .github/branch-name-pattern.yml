@@ -1,0 +1,56 @@
+# Branch Naming Pattern for GitHub Workflows
+# Enforces branch, issue, and pull request naming conventions for this repository.
+
+name: 'Branch, Issue, and PR Name Pattern'
+on:
+  create:
+    branches:
+      - '*'
+  push:
+    branches:
+      - '*'
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name pattern
+        if: github.ref_type == 'branch'
+        run: |
+          BRANCH_NAME="${GITHUB_REF##*/}"
+          # Allowed patterns: feature/, bugfix/, hotfix/, release/, chore/, test/
+          if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|chore|test)\/.+ ]]; then
+            echo "Branch name '$BRANCH_NAME' does not follow the required pattern."
+            echo "Allowed prefixes: feature/, bugfix/, hotfix/, release/, chore/, test/"
+            exit 1
+          fi
+  check-issue-title:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues'
+    steps:
+      - name: Check issue title pattern
+        run: |
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          # Allowed patterns: must start with [Feature], [Bug], [Hotfix], [Release], [Chore], [Test]
+          if [[ ! "$ISSUE_TITLE" =~ ^\[(Feature|Bug|Hotfix|Release|Chore|Test)\] ]]; then
+            echo "Issue title '$ISSUE_TITLE' does not follow the required pattern."
+            echo "Allowed prefixes: [Feature], [Bug], [Hotfix], [Release], [Chore], [Test]"
+            exit 1
+          fi
+  check-pr-template:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Validate PR template usage
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          # Check for required PR template sections
+          if [[ ! "$PR_BODY" =~ '## Description' ]] || [[ ! "$PR_BODY" =~ '## Checklist' ]]; then
+            echo "Pull request description does not follow the required template."
+            echo "Please use the PR template with '## Description' and '## Checklist' sections."
+            exit 1
+          fi
