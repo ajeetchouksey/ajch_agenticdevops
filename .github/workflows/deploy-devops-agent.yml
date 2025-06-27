@@ -35,6 +35,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Initialize CodeQL for code scanning
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: 'python, javascript'  # Add or change languages as needed
+
+      # Autobuild (for supported languages)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      # Run CodeQL Analysis
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
       - name: Azure Login action
         uses: azure/login@v2
         with:
