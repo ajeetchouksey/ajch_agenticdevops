@@ -62,6 +62,13 @@ jobs:
           CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
         run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP" -backend-config="key=adoagent.tfstate" -backend-config="access_key=$STORAGE_ACCOUNT_KEY"
      
+      - name: Checkov Security Scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: bootstrap
+          framework: terraform
+          quiet: true
+
       - name: Terraform Plan
         id: plan
         working-directory: bootstrap
@@ -82,13 +89,6 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         run: terraform apply -auto-approve -var 'environment=p' -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}'
-
-      - name: Checkov Security Scan
-        uses: bridgecrewio/checkov-action@v12
-        with:
-          directory: bootstrap
-          framework: terraform
-          quiet: true
 
       - name: Post-Apply Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
