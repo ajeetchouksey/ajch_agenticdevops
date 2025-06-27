@@ -30,10 +30,23 @@ def get_pr_diff():
 
 def ai_review(diff):
     # Example for OpenAI-compatible API
+    prompt = (
+        "You are an expert code reviewer. Only comment on the changes in this PR diff. "
+        "Organize your suggestions into two categories: 'Critical' (must-fix, security, compliance, or correctness) and 'General' (style, maintainability, minor improvements). "
+        "Output your suggestions in the following format:\n"
+        "<details><summary>AI Review Suggestions (click to expand)</summary>\n\n"
+        "#### Critical\n"
+        "- ...\n"
+        "\n#### General\n"
+        "- ...\n"
+        "</details>\n\n"
+        "At the end, show a clear, visually highlighted heading: '### Recommended for approval: Yes' or '### Recommended for approval: No' based on your review. "
+        "If there are no Critical issues, recommend approval."
+    )
     payload = {
         "model": "gpt-4",
         "messages": [
-            {"role": "system", "content": "You are a code reviewer. Suggest improvements and flag security issues."},
+            {"role": "system", "content": prompt},
             {"role": "user", "content": diff}
         ]
     }
