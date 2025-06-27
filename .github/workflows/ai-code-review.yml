@@ -1,3 +1,6 @@
+
+# GitHub Actions Workflow: AI Code Review on Pull Requests
+# This workflow runs an AI-powered code review on every PR using a custom Python script.
 name: AI Code Review
 on:
   pull_request:
@@ -7,16 +10,20 @@ jobs:
   ai_code_review:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout the repository code
       - uses: actions/checkout@v4
 
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
+      # Step 3: Install Python dependencies for the AI review script
       - name: Install dependencies
         run: pip install -r ai-agents/codequality_agent/requirements.txt
 
+      # Step 4: Run the AI code review script on the pull request diff
       - name: Run AI Code Review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
