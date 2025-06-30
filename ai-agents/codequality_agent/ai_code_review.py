@@ -130,7 +130,7 @@ def ai_review(diff, ai_api_url, ai_api_key):
         "### 🛑 Critical Recommendations\n"
         "#### Code Issues\n"
         "- ...\n"
-        "\n#### Other Critical Issues (Process, Docs, Tests, etc.)\n"
+        "\n#### Other Critical Issues (Process, Docs, Tests, Security, etc.)\n"
         "- ...\n"
         "\n### ✨ General Recommendations\n"
         "#### Code Suggestions\n"
@@ -139,7 +139,7 @@ def ai_review(diff, ai_api_url, ai_api_key):
         "- ...\n"
         "</details>\n\n"
         "At the end, show a clear, visually highlighted heading: '### ✅ Recommended for approval: Yes' or '### ❌ Recommended for approval: No' based on your review. "
-        "If there are no Critical issues, recommend approval."
+        "If there are any Critical issues—including those related to security, testing, or documentation—do NOT recommend approval. Only recommend approval if all critical issues are fully addressed."
     )
     if diff is None:
         return "**Error:** Unable to fetch PR diff. Please check your network connection, PR number, and GitHub token permissions."
