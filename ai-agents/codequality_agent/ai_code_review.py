@@ -2,6 +2,9 @@
 
 # AI Code Review Script for GitHub PRs
 #
+# SECURITY WARNING: Never print, log, or store sensitive environment variables (e.g., GITHUB_TOKEN, AI_API_KEY) in logs, output, or source code.
+# Always set these securely in your CI/CD environment or local shell, and avoid echoing or exposing them in error messages or debug output.
+#
 # SECURITY NOTE: All code improvements and additions must not bypass existing security checks or introduce new vulnerabilities. 
 # Ensure secure handling of dynamic content and input validation to mitigate security threats (e.g., SQL injection, XSS).
 #
@@ -38,6 +41,7 @@ import sys
 import requests
 
 def validate_credentials(token, api_key):
+    # Do not print or log the actual values of token or api_key!
     if not token or not isinstance(token, str) or not token.strip():
         print("""
 Error: GITHUB_TOKEN environment variable is not set or is invalid.
@@ -48,6 +52,7 @@ You can set it in your shell with:
   $env:GITHUB_TOKEN="your_token_here"  # PowerShell
   set GITHUB_TOKEN=your_token_here      # Windows CMD
 Refer to the project documentation for more details.
+Never print or log your token value.
 """)
         sys.exit(1)
     if not api_key or not isinstance(api_key, str) or not api_key.strip():
@@ -60,6 +65,7 @@ You can set it in your shell with:
   $env:AI_API_KEY="your_key_here"     # PowerShell
   set AI_API_KEY=your_key_here         # Windows CMD
 Refer to the project documentation for more details.
+Never print or log your API key value.
 """)
         sys.exit(1)
 
