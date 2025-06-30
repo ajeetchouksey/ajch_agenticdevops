@@ -9,8 +9,12 @@ This document explains the differences between the custom AI PR Review agent in 
 - **How it works:**
   - Fetches pull request diffs from GitHub.
   - Sends the diff to an AI model (e.g., Azure OpenAI, OpenAI API).
-  - The AI reviews only the changes in the PR, organizes suggestions into 'Critical' and 'General' categories, and provides actionable code improvement suggestions.
+  - The AI reviews only the changes in the PR and organizes suggestions into 'Critical' and 'General' categories.
   - Posts a formatted review comment directly on the PR.
+
+#### Code Improvement Suggestions
+- Provides actionable code improvement suggestions based on the PR diff.
+- Suggestions are included in the review comment for developers to consider and implement.
 - **Customization:**
   - You control the prompt, review style, and which AI model is used.
   - Can be integrated into CI/CD or run manually.
