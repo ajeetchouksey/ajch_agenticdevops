@@ -1,3 +1,8 @@
+# Screenshots (if applicable)
+Add screenshots to help explain your changes visually.
+
+# Additional Notes
+Add any other context or information here.
 # Pull Request Template
 
 ## Description
@@ -21,4 +26,7 @@ Fixes # (issue)
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing tests pass locally with my changes
 
+## Screenshots (if applicable)
 
+## Additional Notes
+Add any other context or information here.
