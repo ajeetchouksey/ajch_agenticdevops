@@ -34,32 +34,57 @@ Error Handling & Credential Validation:
 """
 
 import os
+import sys
 import requests
 
+def validate_credentials(token, api_key):
+    if not token:
+        print("""
+Error: GITHUB_TOKEN environment variable is not set.
+Suggested Action: Please set the GITHUB_TOKEN environment variable with a valid GitHub personal access token.
+See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+You can set it in your shell with:
+  export GITHUB_TOKEN=your_token_here  # Linux/macOS
+  $env:GITHUB_TOKEN="your_token_here"  # PowerShell
+  set GITHUB_TOKEN=your_token_here      # Windows CMD
+Refer to the project documentation for more details.
+""")
+        sys.exit(1)
+    if not api_key:
+        print("""
+Error: AI_API_KEY environment variable is not set.
+Suggested Action: Please set the AI_API_KEY environment variable with your OpenAI or Azure OpenAI API key.
+See: https://platform.openai.com/docs/api-reference/authentication or your Azure OpenAI documentation.
+You can set it in your shell with:
+  export AI_API_KEY=your_key_here       # Linux/macOS
+  $env:AI_API_KEY="your_key_here"     # PowerShell
+  set AI_API_KEY=your_key_here         # Windows CMD
+Refer to the project documentation for more details.
+""")
+        sys.exit(1)
 
-import sys
+def get_config():
+    github_token = os.getenv('GITHUB_TOKEN')
+    github_repo = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
+    pr_number = os.getenv('PR_NUMBER')
+    ai_api_key = os.getenv('AI_API_KEY')
+    ai_api_url = os.getenv('AI_API_URL')  # e.g., Azure OpenAI endpoint
+    validate_credentials(github_token, ai_api_key)
+    headers = {
+        'Authorization': f'token {github_token}',
+        'Accept': 'application/vnd.github.v3+json',
+    }
+    return {
+        'github_token': github_token,
+        'github_repo': github_repo,
+        'pr_number': pr_number,
+        'ai_api_key': ai_api_key,
+        'ai_api_url': ai_api_url,
+        'headers': headers
+    }
 
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-GITHUB_REPOSITORY = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
-PR_NUMBER = os.getenv('PR_NUMBER')
-AI_API_KEY = os.getenv('AI_API_KEY')
-AI_API_URL = os.getenv('AI_API_URL')  # e.g., Azure OpenAI endpoint
-
-# Explicitly check for required credentials
-if not GITHUB_TOKEN:
-    print("Error: GITHUB_TOKEN environment variable is not set.")
-    sys.exit(1)
-if not AI_API_KEY:
-    print("Error: AI_API_KEY environment variable is not set.")
-    sys.exit(1)
-
-headers = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json',
-}
-
-def get_pr_diff():
-    url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/pulls/{PR_NUMBER}"
+def get_pr_diff(github_repo, pr_number, headers):
+    url = f"https://api.github.com/repos/{github_repo}/pulls/{pr_number}"
     try:
         r = requests.get(url, headers=headers)
         r.raise_for_status()
@@ -73,7 +98,7 @@ def get_pr_diff():
         print(f"Error fetching PR diff: {e}")
         return None
 
-def ai_review(diff):
+def ai_review(diff, ai_api_url, ai_api_key):
     # Example for OpenAI-compatible API
     prompt = (
         "You are an expert code reviewer and DevOps advisor. Only comment on the changes in this PR diff. "
@@ -107,8 +132,8 @@ def ai_review(diff):
     }
     try:
         response = requests.post(
-            AI_API_URL,
-            headers={"Authorization": f"Bearer {AI_API_KEY}", "Content-Type": "application/json"},
+            ai_api_url,
+            headers={"Authorization": f"Bearer {ai_api_key}", "Content-Type": "application/json"},
             json=payload
         )
         response.raise_for_status()
@@ -117,15 +142,16 @@ def ai_review(diff):
         print(f"Error calling AI API: {e}")
         return "**Error:** Unable to get AI review. Please check the logs."
 
-def post_pr_comment(body):
-    url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/issues/{PR_NUMBER}/comments"
+def post_pr_comment(body, github_repo, pr_number, headers):
+    url = f"https://api.github.com/repos/{github_repo}/issues/{pr_number}/comments"
     r = requests.post(url, headers=headers, json={"body": body})
     r.raise_for_status()
     return r.json()
 
 def main():
-    diff = get_pr_diff()
-    review = ai_review(diff)
+    config = get_config()
+    diff = get_pr_diff(config['github_repo'], config['pr_number'], config['headers'])
+    review = ai_review(diff, config['ai_api_url'], config['ai_api_key'])
     # Make the review section even more visible and clarify the heading
     comment = (
         "---\n"
@@ -133,7 +159,7 @@ def main():
         "---\n\n"
         f"{review}"
     )
-    post_pr_comment(comment)
+    post_pr_comment(comment, config['github_repo'], config['pr_number'], config['headers'])
 
 if __name__ == "__main__":
     main()
