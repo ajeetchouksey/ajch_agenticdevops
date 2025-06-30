@@ -6,7 +6,7 @@ AgenticDevOps is a next-generation, modular DevOps automation framework for Azur
 
 ---
 
-## 📦 Latest Release Notes ([v0.0.1](https://github.com/ajeetchouksey/ajch_agenticdevops/releases/tag/v0.0.1))
+## 📦 Latest Release Notes ([v0.0.1]([https://github.com/ajeetchouksey/ajch_agenticdevops/releases/tag/v0.0.2]))
 
 ### 🚀 AI PR Review Agent Highlights
 
