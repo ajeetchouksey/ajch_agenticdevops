@@ -27,16 +27,31 @@ Test Coverage:
 AI Agent Behavior Documentation:
 - Document any changes to how the AI agent identifies and reports critical or general issues, especially for non-code/process recommendations.
 - Keep documentation up to date for team and user clarity.
+
+Error Handling & Credential Validation:
+- The script now checks for required environment variables (GITHUB_TOKEN, AI_API_KEY) before proceeding and exits with a clear error if missing.
+- Error handling is implemented for network/API failures and is documented here for maintainability and troubleshooting.
 """
 
 import os
 import requests
+
+
+import sys
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 GITHUB_REPOSITORY = os.getenv('GITHUB_REPOSITORY')  # e.g., 'owner/repo'
 PR_NUMBER = os.getenv('PR_NUMBER')
 AI_API_KEY = os.getenv('AI_API_KEY')
 AI_API_URL = os.getenv('AI_API_URL')  # e.g., Azure OpenAI endpoint
+
+# Explicitly check for required credentials
+if not GITHUB_TOKEN:
+    print("Error: GITHUB_TOKEN environment variable is not set.")
+    sys.exit(1)
+if not AI_API_KEY:
+    print("Error: AI_API_KEY environment variable is not set.")
+    sys.exit(1)
 
 headers = {
     'Authorization': f'token {GITHUB_TOKEN}',
