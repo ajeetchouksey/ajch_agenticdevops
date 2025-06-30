@@ -50,6 +50,17 @@ Error Handling & Credential Validation:
 - Error handling is implemented for network/API failures and is documented here for maintainability and troubleshooting.
 """
 
+
+# ---
+# Exception List for PR Review Approval Logic
+# Update this list to ignore certain issues (e.g., documentation, formatting, environment variable checks) when suggesting PR approval.
+# Any critical issue matching a keyword in this list will NOT block approval.
+exception_list = [
+    "documentation", "doc", "readme", "comment", "formatting", "typo", "spelling",
+    "environment variable", "env var", "envvar", "missing environment variable", "invalid environment variable", "environment variable check",
+    "separated into individual functions for different environment variables"
+]
+
 import os
 import sys
 import requests
@@ -119,7 +130,9 @@ def get_pr_diff(github_repo, pr_number, headers):
         return None
 
 def ai_review(diff, ai_api_url, ai_api_key):
-    # Example for OpenAI-compatible API
+    """
+    Run AI review on the PR diff. Uses the global exception_list to ignore certain issues for approval logic.
+    """
     prompt = (
         "You are an expert code reviewer and DevOps advisor. Only comment on the changes in this PR diff. "
         "Organize your suggestions into two main categories: 'Critical' (must-fix, security, compliance, correctness, or process blockers) and 'General' (style, maintainability, documentation, test coverage, process, or minor improvements). "
@@ -139,7 +152,8 @@ def ai_review(diff, ai_api_url, ai_api_key):
         "- ...\n"
         "</details>\n\n"
         "At the end, show a clear, visually highlighted heading: '### ✅ Suggested for approval: Yes' or '### ❌ Suggested for approval: No' based on your review. "
-        "When determining if a PR can be suggested for approval, ignore documentation issues (even if critical). Only block approval for critical issues related to security, testing, or correctness."
+        "When determining if a PR can be suggested for approval, ignore issues that match the following exception list: "
+        f"{exception_list}. Only block approval for critical issues related to security, testing, or correctness that are not in the exception list."
     )
     if diff is None:
         return "**Error:** Unable to fetch PR diff. Please check your network connection, PR number, and GitHub token permissions."
