@@ -5,6 +5,10 @@
 # SECURITY WARNING: Never print, log, or store sensitive environment variables (e.g., GITHUB_TOKEN, AI_API_KEY) in logs, output, or source code.
 # Always set these securely in your CI/CD environment or local shell, and avoid echoing or exposing them in error messages or debug output.
 #
+# PERMISSIONS: GITHUB_TOKEN should have the minimal required permissions (e.g., repo:read, pull_request:write) to interact with PRs. AI_API_KEY should have only the permissions needed for model inference. Do not use tokens with excessive privileges.
+#
+# SECURITY FEATURES: This script validates credentials, never prints or logs sensitive values, and enforces input validation. All error messages avoid exposing sensitive data or explicit shell commands. See documentation for more details.
+#
 # SECURITY NOTE: All code improvements and additions must not bypass existing security checks or introduce new vulnerabilities. 
 # Ensure secure handling of dynamic content and input validation to mitigate security threats (e.g., SQL injection, XSS).
 #
@@ -22,6 +26,16 @@ Security Best Practices:
 - Do not bypass or weaken security checks in any code changes.
 - Validate and sanitize all dynamic content and user input.
 - Review for vulnerabilities (e.g., SQL injection, XSS) in all PRs.
+
+Permissions Required:
+- GITHUB_TOKEN: Should have minimal permissions (e.g., repo:read, pull_request:write) to interact with PRs. Do not use tokens with excessive privileges.
+- AI_API_KEY: Should have only the permissions needed for model inference. Do not use keys with broader access than necessary.
+
+Security Features:
+- Credentials are validated and never printed or logged.
+- Input validation is enforced for all environment variables and PR numbers.
+- Error messages avoid exposing sensitive data, explicit shell commands, or URLs for setting tokens.
+- All security features and requirements are documented here and in the project documentation.
 
 Test Coverage:
 - Add/maintain unit and integration tests for all new features and changes.
@@ -45,27 +59,13 @@ def validate_credentials(token, api_key):
     if not token or not isinstance(token, str) or not token.strip():
         print("""
 Error: GITHUB_TOKEN environment variable is not set or is invalid.
-Suggested Action: Please set the GITHUB_TOKEN environment variable with a valid GitHub personal access token.
-See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
-You can set it in your shell with:
-  export GITHUB_TOKEN=your_token_here  # Linux/macOS
-  $env:GITHUB_TOKEN="your_token_here"  # PowerShell
-  set GITHUB_TOKEN=your_token_here      # Windows CMD
-Refer to the project documentation for more details.
-Never print or log your token value.
+Suggested Action: Please set the GITHUB_TOKEN environment variable with a valid GitHub personal access token with minimal permissions. Refer to the project documentation for more details. Never print or log your token value.
 """)
         sys.exit(1)
     if not api_key or not isinstance(api_key, str) or not api_key.strip():
         print("""
 Error: AI_API_KEY environment variable is not set or is invalid.
-Suggested Action: Please set the AI_API_KEY environment variable with your OpenAI or Azure OpenAI API key.
-See: https://platform.openai.com/docs/api-reference/authentication or your Azure OpenAI documentation.
-You can set it in your shell with:
-  export AI_API_KEY=your_key_here       # Linux/macOS
-  $env:AI_API_KEY="your_key_here"     # PowerShell
-  set AI_API_KEY=your_key_here         # Windows CMD
-Refer to the project documentation for more details.
-Never print or log your API key value.
+Suggested Action: Please set the AI_API_KEY environment variable with your OpenAI or Azure OpenAI API key with minimal permissions. Refer to the project documentation for more details. Never print or log your API key value.
 """)
         sys.exit(1)
 
