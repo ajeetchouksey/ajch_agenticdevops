@@ -75,10 +75,10 @@ def post_pr_comment(body):
 def main():
     diff = get_pr_diff()
     review = ai_review(diff)
-    # Make the review section even more visible at the top
+    # Make the review section even more visible and clarify the heading
     comment = (
         "---\n"
-        "## 🚀 <span style='color:#2b6cb0'>AI PR Review Suggestions</span>\n"
+        "## 🚀 <span style='color:#2b6cb0'>AI Code Improvement Suggestions as PR review by AI Agent</span>\n"
         "---\n\n"
         f"{review}"
     )
