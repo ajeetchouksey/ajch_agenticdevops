@@ -1,3 +1,8 @@
+# Screenshots (if applicable)
+Add screenshots to help explain your changes visually.
+
+# Additional Notes
+Add any other context or information here.
 # Pull Request Template
 
 ## Description
