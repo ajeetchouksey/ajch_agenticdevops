@@ -1,4 +1,3 @@
-
 To enable agentic DevOps, you can create AI agents that automate, monitor, and optimize your DevOps workflows. Here are some practical AI agent types you can implement:
 
 1. Pipeline Orchestration Agent  
@@ -28,3 +27,9 @@ To enable agentic DevOps, you can create AI agents that automate, monitor, and o
 7. ChatOps Agent  
    - Integrates with chat platforms to allow conversational control of pipelines, deployments, and monitoring.
    - Answers questions, triggers jobs, and summarizes status.
+
+# AI PR Review vs GitHub Copilot PR Review
+
+See [AI_PR_REVIEW_COMPARISON.md](./AI_PR_REVIEW_COMPARISON.md) for a detailed comparison between the custom AI PR Review agent and GitHub Copilot PR Review.
+
+---
