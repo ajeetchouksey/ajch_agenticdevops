@@ -14,8 +14,8 @@
 #     address_prefixes     = ["10.0.1.0/24"]
 #   }
 #
-# Output:
-#   - azurerm_subnet.this: Map of created subnet resources, keyed by subnet name.
+# Note:
+#   - The created subnets can be referenced as a map via azurerm_subnet.this in other modules or outputs (see outputs.tf for actual outputs).
 
 resource "azurerm_subnet" "this" {
   for_each             = { for s in var.subnets : s.name => s } # Create a subnet for each entry in the subnets list
