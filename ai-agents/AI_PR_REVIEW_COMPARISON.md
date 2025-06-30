@@ -4,7 +4,7 @@ This document explains the differences between the custom AI PR Review agent in 
 
 ---
 
-## AI PR Review Agent (Custom)
+### AI PR Review Agent (Custom)
 - **Location:** `ai-agents/codequality_agent/ai_code_review.py`
 - **How it works:**
   - Fetches pull request diffs from GitHub.
@@ -19,7 +19,7 @@ This document explains the differences between the custom AI PR Review agent in 
   - Use private or organization-specific AI models.
   - Add organization-specific review logic or formatting.
 
-## GitHub Copilot PR Review
+### GitHub Copilot PR Review
 - **How it works:**
   - GitHub Copilot (and Copilot for PRs) uses OpenAI models to suggest code changes and review pull requests directly in the GitHub UI.
   - Provides inline suggestions, explanations, and can summarize PRs.
@@ -33,7 +33,7 @@ This document explains the differences between the custom AI PR Review agent in 
 
 ---
 
-## Summary Table
+### Summary Table
 
 | Feature                | AI PR Review Agent (Custom) | GitHub Copilot PR Review |
 |------------------------|-----------------------------|--------------------------|
