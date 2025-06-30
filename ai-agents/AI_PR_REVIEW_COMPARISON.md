@@ -19,6 +19,13 @@ This document explains the differences between the custom AI PR Review agent in 
   - Use private or organization-specific AI models.
   - Add organization-specific review logic or formatting.
 
+#### Limitations
+- Requires setup and maintenance of scripts and API keys.
+- Review quality depends on the chosen AI model and prompt engineering.
+- May incur additional costs for API usage (e.g., Azure OpenAI).
+- Not natively integrated into the GitHub UI; requires CI/CD or manual runs.
+- May require custom error handling and security considerations for secrets.
+
 ### GitHub Copilot PR Review
 - **How it works:**
   - GitHub Copilot (and Copilot for PRs) uses OpenAI models to suggest code changes and review pull requests directly in the GitHub UI.
@@ -32,6 +39,13 @@ This document explains the differences between the custom AI PR Review agent in 
   - Useful for individual developers and teams using GitHub's web interface.
 
 ---
+
+#### Limitations
+- Limited customization; cannot change the underlying prompt or model.
+- Only available with a Copilot subscription.
+- Review suggestions may be generic and not tailored to organization-specific standards.
+- Requires internet access and GitHub integration.
+- May not support private/self-hosted AI models.
 
 ### Summary Table
 
