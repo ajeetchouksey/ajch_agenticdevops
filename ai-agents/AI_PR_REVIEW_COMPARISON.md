@@ -43,6 +43,8 @@ This document explains the differences between the custom AI PR Review agent in 
 #### Limitations
 - Limited customization; cannot change the underlying prompt or model.
 - Only available with a Copilot subscription.
+- Only available on specific GitHub plans/versions (e.g., Copilot Business/Enterprise, not all users).
+- PR review is triggered automatically only for the first pull request; subsequent reviews must be triggered manually.
 - Review suggestions may be generic and not tailored to organization-specific standards.
 - Requires internet access and GitHub integration.
 - May not support private/self-hosted AI models.
