@@ -1,3 +1,8 @@
+Code Issues
+Security Configuration Comments: While it's good practice to alert users regarding security in the code comments (as seen in ai_code_review.py), such warnings may also suggest places where the real implementation might not yet meet these security levels. Regular audits and tests should be enforced to make sure these claims are accurate and up-to-date. This includes verifying that none of these sensitive values are logged or exposed accidentally in any debug or error outputs throughout the application lifecycle.
+Other Critical Issues (Process, Docs, Tests, Security, etc.)
+Error Handling: The new error handling implemented introduces a pattern of exiting the program using sys.exit(1) within utility functions like validate_credentials in ai_code_review.py. It's generally advisable for utility functions to raise exceptions rather than exit directly, which allows higher-level application logic to decide how to handle these errors—be it retrying, logging, or alerting. Direct exits can make modular testing and reusable code more difficult.
+AI API Handling: The ai_review function in ai_code_review.py uses a catch-all requests.Timeout but lacks specific handling for other potential exceptions such as json.JSONDecodeError, which could occur if the response from the AI API is not properly formatted JSON. This could result in unhandled exceptions that terminate the script unexpectedly. Adding a broad exception catcher or specific handlers for common issues would enhance robustness.
 # PR Review Exception List
 # Add one keyword or phrase per line. Any critical issue containing one of these will NOT block PR approval.
 # Example:
