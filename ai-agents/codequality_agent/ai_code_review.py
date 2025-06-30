@@ -1,4 +1,7 @@
+
 # AI Code Review Script for GitHub PRs
+#
+# NOTE: Unit tests should be added to cover error handling and output formatting logic for robustness.
 
 """
 This script fetches pull request diffs, sends them to an AI model for review, and posts suggestions as comments on the PR.
@@ -21,12 +24,18 @@ headers = {
 
 def get_pr_diff():
     url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/pulls/{PR_NUMBER}"
-    r = requests.get(url, headers=headers)
-    r.raise_for_status()
-    pr = r.json()
-    diff_url = pr['diff_url']
-    diff = requests.get(diff_url, headers=headers).text
-    return diff
+    try:
+        r = requests.get(url, headers=headers)
+        r.raise_for_status()
+        pr = r.json()
+        diff_url = pr['diff_url']
+        diff_resp = requests.get(diff_url, headers=headers)
+        diff_resp.raise_for_status()
+        diff = diff_resp.text
+        return diff
+    except requests.RequestException as e:
+        print(f"Error fetching PR diff: {e}")
+        return None
 
 def ai_review(diff):
     # Example for OpenAI-compatible API
@@ -51,6 +60,8 @@ def ai_review(diff):
         "At the end, show a clear, visually highlighted heading: '### ✅ Recommended for approval: Yes' or '### ❌ Recommended for approval: No' based on your review. "
         "If there are no Critical issues, recommend approval."
     )
+    if diff is None:
+        return "**Error:** Unable to fetch PR diff. Please check the logs."
     payload = {
         "model": "gpt-4",
         "messages": [
@@ -58,13 +69,17 @@ def ai_review(diff):
             {"role": "user", "content": diff}
         ]
     }
-    response = requests.post(
-        AI_API_URL,
-        headers={"Authorization": f"Bearer {AI_API_KEY}", "Content-Type": "application/json"},
-        json=payload
-    )
-    response.raise_for_status()
-    return response.json()['choices'][0]['message']['content']
+    try:
+        response = requests.post(
+            AI_API_URL,
+            headers={"Authorization": f"Bearer {AI_API_KEY}", "Content-Type": "application/json"},
+            json=payload
+        )
+        response.raise_for_status()
+        return response.json()['choices'][0]['message']['content']
+    except requests.RequestException as e:
+        print(f"Error calling AI API: {e}")
+        return "**Error:** Unable to get AI review. Please check the logs."
 
 def post_pr_comment(body):
     url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/issues/{PR_NUMBER}/comments"
