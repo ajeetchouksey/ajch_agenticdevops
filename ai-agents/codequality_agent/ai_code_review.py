@@ -38,9 +38,9 @@ import sys
 import requests
 
 def validate_credentials(token, api_key):
-    if not token:
+    if not token or not isinstance(token, str) or not token.strip():
         print("""
-Error: GITHUB_TOKEN environment variable is not set.
+Error: GITHUB_TOKEN environment variable is not set or is invalid.
 Suggested Action: Please set the GITHUB_TOKEN environment variable with a valid GitHub personal access token.
 See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 You can set it in your shell with:
@@ -50,9 +50,9 @@ You can set it in your shell with:
 Refer to the project documentation for more details.
 """)
         sys.exit(1)
-    if not api_key:
+    if not api_key or not isinstance(api_key, str) or not api_key.strip():
         print("""
-Error: AI_API_KEY environment variable is not set.
+Error: AI_API_KEY environment variable is not set or is invalid.
 Suggested Action: Please set the AI_API_KEY environment variable with your OpenAI or Azure OpenAI API key.
 See: https://platform.openai.com/docs/api-reference/authentication or your Azure OpenAI documentation.
 You can set it in your shell with:
@@ -70,6 +70,14 @@ def get_config():
     ai_api_key = os.getenv('AI_API_KEY')
     ai_api_url = os.getenv('AI_API_URL')  # e.g., Azure OpenAI endpoint
     validate_credentials(github_token, ai_api_key)
+    # Validate PR number
+    if not pr_number or not pr_number.isdigit():
+        print("""
+Error: PR_NUMBER environment variable is not set or is not a valid pull request number.
+Suggested Action: Please set the PR_NUMBER environment variable to the numeric ID of the pull request you want to review.
+Refer to the project documentation for more details.
+""")
+        sys.exit(1)
     headers = {
         'Authorization': f'token {github_token}',
         'Accept': 'application/vnd.github.v3+json',
@@ -86,16 +94,22 @@ def get_config():
 def get_pr_diff(github_repo, pr_number, headers):
     url = f"https://api.github.com/repos/{github_repo}/pulls/{pr_number}"
     try:
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers, timeout=10)
         r.raise_for_status()
         pr = r.json()
-        diff_url = pr['diff_url']
-        diff_resp = requests.get(diff_url, headers=headers)
+        diff_url = pr.get('diff_url')
+        if not diff_url:
+            print("Error: Could not find diff_url in PR response. Please check if the PR number is correct and accessible.")
+            return None
+        diff_resp = requests.get(diff_url, headers=headers, timeout=10)
         diff_resp.raise_for_status()
         diff = diff_resp.text
         return diff
+    except requests.Timeout:
+        print("Error: Network timeout while fetching PR diff. Please check your internet connection and try again.")
+        return None
     except requests.RequestException as e:
-        print(f"Error fetching PR diff: {e}")
+        print(f"Error fetching PR diff: {e}\nSuggested Action: Check your network connection, GitHub token permissions, and PR number.")
         return None
 
 def ai_review(diff, ai_api_url, ai_api_key):
@@ -122,7 +136,7 @@ def ai_review(diff, ai_api_url, ai_api_key):
         "If there are no Critical issues, recommend approval."
     )
     if diff is None:
-        return "**Error:** Unable to fetch PR diff. Please check the logs."
+        return "**Error:** Unable to fetch PR diff. Please check your network connection, PR number, and GitHub token permissions."
     payload = {
         "model": "gpt-4",
         "messages": [
@@ -134,19 +148,30 @@ def ai_review(diff, ai_api_url, ai_api_key):
         response = requests.post(
             ai_api_url,
             headers={"Authorization": f"Bearer {ai_api_key}", "Content-Type": "application/json"},
-            json=payload
+            json=payload,
+            timeout=20
         )
         response.raise_for_status()
         return response.json()['choices'][0]['message']['content']
+    except requests.Timeout:
+        print("Error: Network timeout while calling AI API. Please check your internet connection and try again.")
+        return "**Error:** Network timeout while calling AI API. Please check your internet connection and try again."
     except requests.RequestException as e:
-        print(f"Error calling AI API: {e}")
-        return "**Error:** Unable to get AI review. Please check the logs."
+        print(f"Error calling AI API: {e}\nSuggested Action: Check your network connection, API key, and endpoint URL.")
+        return "**Error:** Unable to get AI review. Please check your network connection, API key, and endpoint URL."
 
 def post_pr_comment(body, github_repo, pr_number, headers):
     url = f"https://api.github.com/repos/{github_repo}/issues/{pr_number}/comments"
-    r = requests.post(url, headers=headers, json={"body": body})
-    r.raise_for_status()
-    return r.json()
+    try:
+        r = requests.post(url, headers=headers, json={"body": body}, timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except requests.Timeout:
+        print("Error: Network timeout while posting PR comment. Please check your internet connection and try again.")
+        return None
+    except requests.RequestException as e:
+        print(f"Error posting PR comment: {e}\nSuggested Action: Check your network connection, GitHub token permissions, and PR number.")
+        return None
 
 def main():
     config = get_config()
@@ -159,7 +184,9 @@ def main():
         "---\n\n"
         f"{review}"
     )
-    post_pr_comment(comment, config['github_repo'], config['pr_number'], config['headers'])
+    result = post_pr_comment(comment, config['github_repo'], config['pr_number'], config['headers'])
+    if result is None:
+        print("Failed to post PR review comment. Please check the error messages above for troubleshooting steps.")
 
 if __name__ == "__main__":
     main()
