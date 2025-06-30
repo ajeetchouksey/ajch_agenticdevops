@@ -51,7 +51,12 @@ Error Handling & Credential Validation:
 """
 
 
+
 # ---
+
+import os
+import sys
+import requests
 
 # Exception List for PR Review Approval Logic
 # Loads from pr_review_exception_list.txt if present, otherwise uses the default list below.
@@ -72,10 +77,6 @@ def load_exception_list():
     ]
 
 exception_list = load_exception_list()
-
-import os
-import sys
-import requests
 
 def validate_credentials(token, api_key):
     # Do not print or log the actual values of token or api_key!
