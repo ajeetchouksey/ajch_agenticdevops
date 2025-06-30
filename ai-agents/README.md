@@ -32,6 +32,11 @@ The custom AI PR Review agent provides two types of recommendations in PR commen
 
 These recommendations are clearly separated and highlighted in the PR review comment for maximum visibility.
 
+
+## PR Template Example
+
+![PR Template Example](https://user-images.githubusercontent.com/placeholder/pr-template-example.png)
+
 See [AI_PR_REVIEW_COMPARISON.md](./AI_PR_REVIEW_COMPARISON.md) for a detailed comparison between the custom AI PR Review agent and GitHub Copilot PR Review.
 
 ---

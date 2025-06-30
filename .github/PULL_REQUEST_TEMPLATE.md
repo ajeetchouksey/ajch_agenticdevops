@@ -23,5 +23,6 @@ Fixes # (issue)
 
 ## Screenshots (if applicable)
 
+![PR Template Example](https://user-images.githubusercontent.com/placeholder/pr-template-example.png)
 ## Additional Notes
 Add any other context or information here.
