@@ -52,14 +52,26 @@ Error Handling & Credential Validation:
 
 
 # ---
+
 # Exception List for PR Review Approval Logic
-# Update this list to ignore certain issues (e.g., documentation, formatting, environment variable checks) when suggesting PR approval.
-# Any critical issue matching a keyword in this list will NOT block approval.
-exception_list = [
-    "documentation", "doc", "readme", "comment", "formatting", "typo", "spelling",
-    "environment variable", "env var", "envvar", "missing environment variable", "invalid environment variable", "environment variable check",
-    "separated into individual functions for different environment variables"
-]
+# Loads from pr_review_exception_list.txt if present, otherwise uses the default list below.
+def load_exception_list():
+    exception_file = os.path.join(os.path.dirname(__file__), "pr_review_exception_list.txt")
+    try:
+        with open(exception_file, "r", encoding="utf-8") as f:
+            lines = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+        if lines:
+            return lines
+    except Exception:
+        pass
+    # Fallback default list
+    return [
+        "documentation", "doc", "readme", "comment", "formatting", "typo", "spelling",
+        "environment variable", "env var", "envvar", "missing environment variable", "invalid environment variable", "environment variable check",
+        "separated into individual functions for different environment variables"
+    ]
+
+exception_list = load_exception_list()
 
 import os
 import sys
@@ -152,7 +164,7 @@ def ai_review(diff, ai_api_url, ai_api_key):
         "- ...\n"
         "</details>\n\n"
         "At the end, show a clear, visually highlighted heading: '### ✅ Suggested for approval: Yes' or '### ❌ Suggested for approval: No' based on your review. "
-        "When determining if a PR can be suggested for approval, ignore issues that match the following exception list: "
+        "When determining if a PR can be suggested for approval, do NOT consider any critical issue that matches the following exception list: "
         f"{exception_list}. Only block approval for critical issues related to security, testing, or correctness that are not in the exception list."
     )
     if diff is None:
