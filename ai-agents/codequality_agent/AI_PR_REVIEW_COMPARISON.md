@@ -13,8 +13,14 @@ This document explains the differences between the custom AI PR Review agent in 
   - Posts a formatted review comment directly on the PR.
 
 #### Code Improvement Suggestions
-- Provides actionable code improvement suggestions based on the PR diff.
-- Suggestions are included in the review comment for developers to consider and implement.
+
+##### Critical Recommendations
+- Issues that may cause build failures, security vulnerabilities, or major bugs.
+- Actionable suggestions to resolve critical issues, such as fixing security flaws, correcting logic errors, or addressing major code smells.
+
+##### General Recommendations
+- Minor issues, style inconsistencies, or best practice recommendations.
+- Suggestions to improve code readability, maintainability, or adherence to style guides.
 - **Customization:**
   - You control the prompt, review style, and which AI model is used.
   - Can be integrated into CI/CD or run manually.
