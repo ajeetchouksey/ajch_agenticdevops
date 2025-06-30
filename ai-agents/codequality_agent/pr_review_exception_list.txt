@@ -1,0 +1,22 @@
+# PR Review Exception List
+# Add one keyword or phrase per line. Any critical issue containing one of these will NOT block PR approval.
+# Example:
+# documentation
+# environment variable
+# separated into individual functions for different environment variables
+
+documentation
+doc
+readme
+comment
+formatting
+typo
+spelling
+environment variable
+env var
+envvar
+missing environment variable
+invalid environment variable
+environment variable check
+separated into individual functions for different environment variables
+Excessive Permissions: The permissions defined suggest minimally required permissions for GITHUB_TOKEN, but suggesting a specific level of scope (e.g., repo:read) could open up potential security risks if not accurately scoped to the needs. Ensure that the scopes are precisely defined to match only what the automation script needs without opening up a broader access than necessary. Define and document specific permission scopes explicitly required for operations.
