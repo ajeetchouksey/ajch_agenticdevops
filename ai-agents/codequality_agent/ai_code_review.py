@@ -31,14 +31,21 @@ def get_pr_diff():
 def ai_review(diff):
     # Example for OpenAI-compatible API
     prompt = (
-        "You are an expert code reviewer. Only comment on the changes in this PR diff. "
-        "Organize your suggestions into two categories: 'Critical' (must-fix, security, compliance, or correctness) and 'General' (style, maintainability, minor improvements). "
-        "Make code improvement suggestions highly visible using markdown headings, emojis, and clear separation. "
+        "You are an expert code reviewer and DevOps advisor. Only comment on the changes in this PR diff. "
+        "Organize your suggestions into two main categories: 'Critical' (must-fix, security, compliance, correctness, or process blockers) and 'General' (style, maintainability, documentation, test coverage, process, or minor improvements). "
+        "For each category, provide both code-related and non-code-related recommendations. Non-code recommendations may include process, documentation, test coverage, CI/CD, or other DevOps best practices. "
+        "Make all suggestions highly visible using markdown headings, emojis, and clear separation. "
         "Output your suggestions in the following format:\n"
-        "<details><summary>🚀 <b>AI Code Improvement Suggestions (click to expand)</b></summary>\n\n"
-        "### 🛑 Critical Code Improvements\n"
+        "<details><summary>🚀 <b>AI PR Review Suggestions (click to expand)</b></summary>\n\n"
+        "### 🛑 Critical Recommendations\n"
+        "#### Code Issues\n"
         "- ...\n"
-        "\n### ✨ General Code Improvements\n"
+        "\n#### Other Critical Issues (Process, Docs, Tests, etc.)\n"
+        "- ...\n"
+        "\n### ✨ General Recommendations\n"
+        "#### Code Suggestions\n"
+        "- ...\n"
+        "\n#### Other General Suggestions (Process, Docs, Tests, etc.)\n"
         "- ...\n"
         "</details>\n\n"
         "At the end, show a clear, visually highlighted heading: '### ✅ Recommended for approval: Yes' or '### ❌ Recommended for approval: No' based on your review. "
@@ -68,10 +75,10 @@ def post_pr_comment(body):
 def main():
     diff = get_pr_diff()
     review = ai_review(diff)
-    # Make the code improvement section even more visible at the top
+    # Make the review section even more visible at the top
     comment = (
         "---\n"
-        "## 🚀 <span style='color:#2b6cb0'>AI Code Improvement Suggestions</span>\n"
+        "## 🚀 <span style='color:#2b6cb0'>AI PR Review Suggestions</span>\n"
         "---\n\n"
         f"{review}"
     )
