@@ -21,8 +21,4 @@ Fixes # (issue)
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing tests pass locally with my changes
 
-## Screenshots (if applicable)
 
-![PR Template Example](https://user-images.githubusercontent.com/placeholder/pr-template-example.png)
-## Additional Notes
-Add any other context or information here.
