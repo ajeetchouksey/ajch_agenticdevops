@@ -33,14 +33,15 @@ def ai_review(diff):
     prompt = (
         "You are an expert code reviewer. Only comment on the changes in this PR diff. "
         "Organize your suggestions into two categories: 'Critical' (must-fix, security, compliance, or correctness) and 'General' (style, maintainability, minor improvements). "
+        "Make code improvement suggestions highly visible using markdown headings, emojis, and clear separation. "
         "Output your suggestions in the following format:\n"
-        "<details><summary>AI Review Suggestions (click to expand)</summary>\n\n"
-        "#### Critical\n"
+        "<details><summary>🚀 <b>AI Code Improvement Suggestions (click to expand)</b></summary>\n\n"
+        "### 🛑 Critical Code Improvements\n"
         "- ...\n"
-        "\n#### General\n"
+        "\n### ✨ General Code Improvements\n"
         "- ...\n"
         "</details>\n\n"
-        "At the end, show a clear, visually highlighted heading: '### Recommended for approval: Yes' or '### Recommended for approval: No' based on your review. "
+        "At the end, show a clear, visually highlighted heading: '### ✅ Recommended for approval: Yes' or '### ❌ Recommended for approval: No' based on your review. "
         "If there are no Critical issues, recommend approval."
     )
     payload = {
@@ -67,7 +68,14 @@ def post_pr_comment(body):
 def main():
     diff = get_pr_diff()
     review = ai_review(diff)
-    post_pr_comment(f"**AI Code Review Suggestions:**\n\n{review}")
+    # Make the code improvement section even more visible at the top
+    comment = (
+        "---\n"
+        "## 🚀 <span style='color:#2b6cb0'>AI Code Improvement Suggestions</span>\n"
+        "---\n\n"
+        f"{review}"
+    )
+    post_pr_comment(comment)
 
 if __name__ == "__main__":
     main()
