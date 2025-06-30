@@ -1,11 +1,32 @@
 
+
 # AI Code Review Script for GitHub PRs
+#
+# SECURITY NOTE: All code improvements and additions must not bypass existing security checks or introduce new vulnerabilities. 
+# Ensure secure handling of dynamic content and input validation to mitigate security threats (e.g., SQL injection, XSS).
+#
+# TEST COVERAGE: Ensure comprehensive test coverage for new features or changes, including integration with automated test pipelines (CI/CD) for dynamic and security testing.
+#
+# DOCUMENTATION: Any change to the AI agent's behavior (especially in identifying critical issues, including non-code recommendations) must be documented for clarity and team alignment.
 #
 # NOTE: Unit tests should be added to cover error handling and output formatting logic for robustness.
 
 """
 This script fetches pull request diffs, sends them to an AI model for review, and posts suggestions as comments on the PR.
 You need a GitHub token and an AI API key (e.g., Azure OpenAI, OpenAI, etc.).
+
+Security Best Practices:
+- Do not bypass or weaken security checks in any code changes.
+- Validate and sanitize all dynamic content and user input.
+- Review for vulnerabilities (e.g., SQL injection, XSS) in all PRs.
+
+Test Coverage:
+- Add/maintain unit and integration tests for all new features and changes.
+- Ensure CI/CD pipelines run automated tests, including security tests.
+
+AI Agent Behavior Documentation:
+- Document any changes to how the AI agent identifies and reports critical or general issues, especially for non-code/process recommendations.
+- Keep documentation up to date for team and user clarity.
 """
 
 import os
