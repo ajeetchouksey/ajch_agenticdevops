@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MGMT_GROUP: ajch_mgt_grp_01
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
