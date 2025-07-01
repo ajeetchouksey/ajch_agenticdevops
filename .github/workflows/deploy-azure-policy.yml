@@ -11,58 +11,66 @@ jobs:
   deploy-policy:
     runs-on: ubuntu-latest
     env:
-      MGMT_GROUP: ${{ secrets.AZURE_MGMT_GROUP }}
+      AZURE_POLICY_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      MGMT_GROUP: ajch_mgt_grp_01
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Azure Login
+      - name: Azure Login (Managed Identity)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ env.AZURE_POLICY_CLIENT_ID }}
+          enable-federated-credential: true
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Validate Policy JSON
-        run: jq empty policies/azure/definitions/allowed-locations-management.json
 
-      - name: Check if Policy Exists
-        id: check_policy
+      - name: Validate All Policy JSON Files
         run: |
-          set +e
-          az policy definition show --name "allowed-locations-management" --management-group "$MGMT_GROUP"
-          echo "exists=$?" >> $GITHUB_OUTPUT
-          set -e
+          for file in policies/azure/definitions/*.json; do
+            echo "Validating $file"
+            jq empty "$file"
+          done
 
-      - name: Create or Update Policy Definition
-        if: steps.check_policy.outputs.exists != '0'
+      - name: Create or Update All Policy Definitions
         run: |
-          az policy definition create \
-            --name "allowed-locations-management" \
-            --display-name "Allowed locations for resources" \
-            --description "Restrict resource creation to West Europe and North Europe." \
-            --rules policies/azure/definitions/allowed-locations-management.json \
-            --mode All \
-            --management-group "$MGMT_GROUP"
-      - name: Update Policy Definition (if exists)
-        if: steps.check_policy.outputs.exists == '0'
-        run: |
-          az policy definition update \
-            --name "allowed-locations-management" \
-            --rules policies/azure/definitions/allowed-locations-management.json \
-            --management-group "$MGMT_GROUP"
+          for file in policies/azure/definitions/*.json; do
+            policy_name=$(basename "$file" .json)
+            echo "Processing $policy_name"
+            az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP"
+            if [ $? -ne 0 ]; then
+              echo "Creating $policy_name"
+              az policy definition create \
+                --name "$policy_name" \
+                --rules "$file" \
+                --mode All \
+                --management-group "$MGMT_GROUP"
+            else
+              echo "Updating $policy_name"
+              az policy definition update \
+                --name "$policy_name" \
+                --rules "$file" \
+                --management-group "$MGMT_GROUP"
+            fi
+          done
 
-      - name: Assign Policy
+      - name: Assign All Policies
         run: |
-          az policy assignment create \
-            --name "enforce-allowed-locations" \
-            --display-name "Enforce Allowed Locations" \
-            --policy "allowed-locations-management" \
-            --management-group "$MGMT_GROUP"
-        continue-on-error: true
+          for file in policies/azure/definitions/*.json; do
+            policy_name=$(basename "$file" .json)
+            echo "Assigning $policy_name"
+            az policy assignment create \
+              --name "assign-$policy_name" \
+              --policy "$policy_name" \
+              --management-group "$MGMT_GROUP" || echo "Assignment for $policy_name may already exist."
+          done
+
 
       - name: Run Compliance Scan
         run: |
           az policy state trigger-scan --management-group "$MGMT_GROUP"
-          az policy state list --management-group "$MGMT_GROUP" --query "[?policyDefinitionId.contains(@, 'allowed-locations-management')]"
+          az policy state list --management-group "$MGMT_GROUP"
 
       - name: Output Success
         run: echo "Azure Policy deployment and compliance scan completed."
