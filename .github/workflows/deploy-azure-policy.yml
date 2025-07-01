@@ -1,5 +1,10 @@
 
+
 name: Deploy Azure Policy
+
+permissions:
+  id-token: write
+  contents: read
 
 on:
   push:
