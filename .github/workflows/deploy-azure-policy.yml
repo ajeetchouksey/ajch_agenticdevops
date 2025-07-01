@@ -28,8 +28,10 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
 
-      - name: Install ajv-cli v4 for JSON Schema Draft-04 support
-        run: npm install -g ajv-cli@4
+      - name: Set up Python and install jsonschema for Draft-04 validation
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install jsonschema==3.2.0
 
       - name: Download Azure Policy Definition Schema
         run: |
@@ -39,7 +41,7 @@ jobs:
         run: |
           for file in policies/azure/definitions/*.json; do
             echo "Schema validating $file"
-            ajv validate -s policyDefinition.schema.json -d "$file"
+            python3 -m jsonschema -i "$file" policyDefinition.schema.json
           done
 
       - name: Create or Update All Policy Definitions
