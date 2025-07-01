@@ -16,7 +16,7 @@ jobs:
   deploy-policy:
     runs-on: ubuntu-latest
     env:
-      AZURE_POLICY_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_POLICY_CLIENT_ID: ${{ secrets.AZURE_POLICY_CLIENT_ID }}
       MGMT_GROUP: ajch_mgt_grp_01
     steps:
       - name: Checkout code
@@ -25,7 +25,7 @@ jobs:
       - name: Azure Login (Managed Identity)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}          
+          client-id: ${{ env.AZURE_POLICY_CLIENT_ID}}          
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
