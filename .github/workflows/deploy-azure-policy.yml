@@ -35,7 +35,7 @@ jobs:
           for file in policies/azure/definitions/*.json; do
             policy_name=$(basename "$file" .json)
             echo "Processing $policy_name"
-            az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP"
+            az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP" || true
             if [ $? -ne 0 ]; then
               echo "Creating $policy_name"
               az policy definition create \
