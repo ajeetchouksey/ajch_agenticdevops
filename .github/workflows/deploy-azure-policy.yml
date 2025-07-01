@@ -28,8 +28,8 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
 
-      - name: Install ajv-cli for JSON Schema Validation
-        run: npm install -g ajv-cli
+      - name: Install ajv-cli v6 for JSON Schema Draft-04 support
+        run: npm install -g ajv-cli@6
 
       - name: Download Azure Policy Definition Schema
         run: |
