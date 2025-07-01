@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MGMT_GROUP: ajch_mgt_grp_01
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,8 +66,13 @@ jobs:
           done
 
       - name: Assign All Policies
+        if: github.ref == 'refs/heads/main'
         run: |
           for file in policies/azure/definitions/*.json; do
+            # Skip rules files
+            if [[ "$file" == *.rules.json ]]; then
+              continue
+            fi
             policy_name=$(basename "$file" .json)
             echo "Assigning $policy_name"
             az policy assignment create \
