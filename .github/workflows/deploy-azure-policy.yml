@@ -40,14 +40,14 @@ jobs:
               echo "Creating $policy_name"
               az policy definition create \
                 --name "$policy_name" \
-                --rules "$file" \
+                --definition @"$file" \
                 --mode All \
                 --management-group "$MGMT_GROUP"
             else
               echo "Updating $policy_name"
               az policy definition update \
                 --name "$policy_name" \
-                --rules "$file" \
+                --definition @"$file" \
                 --management-group "$MGMT_GROUP"
             fi
           done
