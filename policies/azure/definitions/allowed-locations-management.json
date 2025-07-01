@@ -1,24 +1,37 @@
 {
-  "displayName": "Allowed locations for resources",
-  "policyType": "Custom",
-  "mode": "All",
-  "description": "This policy enables you to restrict the locations your organization can specify when deploying resources. Only West Europe and East Europe are allowed.",
+  "displayName": "Allowed locations",
+  "policyType": "BuiltIn",
+  "mode": "Indexed",
+  "description": "This policy enables you to restrict the locations your organization can specify when deploying resources. Use to enforce your geo-compliance requirements. Excludes resource groups, Microsoft.AzureActiveDirectory/b2cDirectories, and resources that use the 'global' region.",
   "metadata": {
+    "version": "1.0.0",
     "category": "General"
   },
+  "version": "1.0.0",
   "parameters": {},
   "policyRule": {
     "if": {
-      "not": {
-        "field": "location",
-        "in": [
-          "westeurope",
-          "easteurope"
-        ]
-      }
+      "allOf": [
+        {
+          "field": "location",
+          "notIn": ["westeurope", "easteurope"]
+        },
+        {
+          "field": "type",
+          "notEquals": "Microsoft.Resources/subscriptions/resourceGroups"
+        },
+        {
+          "field": "type",
+          "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories"
+        },
+        {
+          "field": "location",
+          "notEquals": "global"
+        }
+      ]
     },
     "then": {
-      "effect": "deny"
+      "effect": "audit"
     }
   }
 }
