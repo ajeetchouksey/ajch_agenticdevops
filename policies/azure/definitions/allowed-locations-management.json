@@ -1,26 +1,24 @@
 {
-  "properties": {
-    "displayName": "Allowed locations for resources",
-    "policyType": "Custom",
-    "mode": "All",
-    "description": "This policy enables you to restrict the locations your organization can specify when deploying resources. Only West Europe and North Europe are allowed.",
-    "metadata": {
-      "category": "General"
-    },
-    "parameters": {},
-    "policyRule": {
-      "if": {
-        "not": {
-          "field": "location",
-          "in": [
-            "westeurope",
-            "northeurope"
-          ]
-        }
-      },
-      "then": {
-        "effect": "deny"
+  "displayName": "Allowed locations for resources",
+  "policyType": "Custom",
+  "mode": "All",
+  "description": "This policy enables you to restrict the locations your organization can specify when deploying resources. Only West Europe and East Europe are allowed.",
+  "metadata": {
+    "category": "General"
+  },
+  "parameters": {},
+  "policyRule": {
+    "if": {
+      "not": {
+        "field": "location",
+        "in": [
+          "westeurope",
+          "easteurope"
+        ]
       }
+    },
+    "then": {
+      "effect": "deny"
     }
   }
 }
