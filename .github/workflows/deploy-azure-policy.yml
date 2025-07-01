@@ -1,0 +1,80 @@
+
+
+name: Deploy Azure Policy
+
+
+on:
+  push:
+    paths:
+      - 'policies/azure/definitions/**'
+      - '.github/workflows/deploy-azure-policy.yml'
+
+jobs:
+  deploy-policy:
+    runs-on: ubuntu-latest
+    env:
+      MGMT_GROUP: ajch_mgt_grp_01
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+
+
+
+      - name: Create or Update All Policy Definitions
+        run: |
+          for file in policies/azure/definitions/*.json; do
+            # Skip rules files
+            if [[ "$file" == *.rules.json ]]; then
+              continue
+            fi
+            policy_name=$(basename "$file" .json)
+            echo "Processing $policy_name"
+            rules_file="policies/azure/definitions/${policy_name}.rules.json"
+            if [ ! -f "$rules_file" ]; then
+              echo "ERROR: Rules file $rules_file not found. Skipping $policy_name."
+              continue
+            fi
+            if ! az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP" > /dev/null 2>&1; then
+              echo "Creating $policy_name"
+              az policy definition create \
+                --name "$policy_name" \
+                --display-name "Allowed locations" \
+                --description "This policy enables you to restrict the locations your organization can specify when deploying resources. Use to enforce your geo-compliance requirements. Excludes resource groups, Microsoft.AzureActiveDirectory/b2cDirectories, and resources that use the 'global' region." \
+                --mode Indexed \
+                --rules @$rules_file \
+                --management-group "$MGMT_GROUP"
+            else
+              echo "Updating $policy_name"
+              az policy definition update \
+                --name "$policy_name" \
+                --display-name "Allowed locations" \
+                --description "This policy enables you to restrict the locations your organization can specify when deploying resources. Use to enforce your geo-compliance requirements. Excludes resource groups, Microsoft.AzureActiveDirectory/b2cDirectories, and resources that use the 'global' region." \
+                --mode Indexed \
+                --rules @$rules_file \
+                --management-group "$MGMT_GROUP"
+            fi
+          done
+
+      - name: Assign All Policies
+        if: github.ref == 'refs/heads/main'
+        run: |
+          for file in policies/azure/definitions/*.json; do
+            # Skip rules files
+            if [[ "$file" == *.rules.json ]]; then
+              continue
+            fi
+            policy_name=$(basename "$file" .json)
+            echo "Assigning $policy_name"
+            az policy assignment create \
+              --name "assign-$policy_name" \
+              --policy "$policy_name" \
+              --management-group "$MGMT_GROUP" || echo "Assignment for $policy_name may already exist."
+          done
+
+

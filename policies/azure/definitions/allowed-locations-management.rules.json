@@ -1,0 +1,25 @@
+{
+  "if": {
+    "allOf": [
+      {
+        "field": "location",
+        "notIn": ["westeurope", "easteurope"]
+      },
+      {
+        "field": "type",
+        "notEquals": "Microsoft.Resources/subscriptions/resourceGroups"
+      },
+      {
+        "field": "type",
+        "notEquals": "Microsoft.AzureActiveDirectory/b2cDirectories"
+      },
+      {
+        "field": "location",
+        "notEquals": "global"
+      }
+    ]
+  },
+  "then": {
+    "effect": "audit"
+  }
+}
