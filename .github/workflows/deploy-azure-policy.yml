@@ -1,0 +1,68 @@
+
+name: Deploy Azure Policy
+
+on:
+  push:
+    paths:
+      - 'policies/azure/definitions/**'
+      - '.github/workflows/deploy-azure-policy.yml'
+
+jobs:
+  deploy-policy:
+    runs-on: ubuntu-latest
+    env:
+      MGMT_GROUP: ${{ secrets.AZURE_MGMT_GROUP }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Validate Policy JSON
+        run: jq empty policies/azure/definitions/allowed-locations-management.json
+
+      - name: Check if Policy Exists
+        id: check_policy
+        run: |
+          set +e
+          az policy definition show --name "allowed-locations-management" --management-group "$MGMT_GROUP"
+          echo "exists=$?" >> $GITHUB_OUTPUT
+          set -e
+
+      - name: Create or Update Policy Definition
+        if: steps.check_policy.outputs.exists != '0'
+        run: |
+          az policy definition create \
+            --name "allowed-locations-management" \
+            --display-name "Allowed locations for resources" \
+            --description "Restrict resource creation to West Europe and North Europe." \
+            --rules policies/azure/definitions/allowed-locations-management.json \
+            --mode All \
+            --management-group "$MGMT_GROUP"
+      - name: Update Policy Definition (if exists)
+        if: steps.check_policy.outputs.exists == '0'
+        run: |
+          az policy definition update \
+            --name "allowed-locations-management" \
+            --rules policies/azure/definitions/allowed-locations-management.json \
+            --management-group "$MGMT_GROUP"
+
+      - name: Assign Policy
+        run: |
+          az policy assignment create \
+            --name "enforce-allowed-locations" \
+            --display-name "Enforce Allowed Locations" \
+            --policy "allowed-locations-management" \
+            --management-group "$MGMT_GROUP"
+        continue-on-error: true
+
+      - name: Run Compliance Scan
+        run: |
+          az policy state trigger-scan --management-group "$MGMT_GROUP"
+          az policy state list --management-group "$MGMT_GROUP" --query "[?policyDefinitionId.contains(@, 'allowed-locations-management')]"
+
+      - name: Output Success
+        run: echo "Azure Policy deployment and compliance scan completed."
