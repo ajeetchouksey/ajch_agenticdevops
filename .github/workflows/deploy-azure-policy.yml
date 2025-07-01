@@ -33,9 +33,12 @@ jobs:
       - name: Create or Update All Policy Definitions
         run: |
           for file in policies/azure/definitions/*.json; do
+            # Skip rules files
+            if [[ "$file" == *.rules.json ]]; then
+              continue
+            fi
             policy_name=$(basename "$file" .json)
             echo "Processing $policy_name"
-            az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP" || true
             rules_file="policies/azure/definitions/${policy_name}.rules.json"
             if [ ! -f "$rules_file" ]; then
               echo "ERROR: Rules file $rules_file not found. Skipping $policy_name."
