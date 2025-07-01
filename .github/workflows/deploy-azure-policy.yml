@@ -37,7 +37,11 @@ jobs:
             echo "Processing $policy_name"
             az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP" || true
             rules_file="policies/azure/definitions/${policy_name}.rules.json"
-            if [ $? -ne 0 ]; then
+            if [ ! -f "$rules_file" ]; then
+              echo "ERROR: Rules file $rules_file not found. Skipping $policy_name."
+              continue
+            fi
+            if ! az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP" > /dev/null 2>&1; then
               echo "Creating $policy_name"
               az policy definition create \
                 --name "$policy_name" \
