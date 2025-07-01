@@ -26,11 +26,18 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 
-      - name: Validate All Policy JSON Files
+      - name: Install ajv-cli for JSON Schema Validation
+        run: npm install -g ajv-cli
+
+      - name: Download Azure Policy Definition Schema
+        run: |
+          curl -L -o policyDefinition.schema.json https://schema.management.azure.com/schemas/2019-09-01/policyDefinition.json
+
+      - name: Validate All Policy JSON Files (Schema)
         run: |
           for file in policies/azure/definitions/*.json; do
-            echo "Validating $file"
-            jq empty "$file"
+            echo "Schema validating $file"
+            ajv validate -s policyDefinition.schema.json -d "$file"
           done
 
       - name: Create or Update All Policy Definitions
