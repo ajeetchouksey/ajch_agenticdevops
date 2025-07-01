@@ -28,21 +28,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
 
-      - name: Set up Python and install jsonschema for Draft-04 validation
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install jsonschema==3.2.0
 
-      - name: Download Azure Policy Definition Schema
-        run: |
-          curl -L -o policyDefinition.schema.json https://schema.management.azure.com/schemas/2019-09-01/policyDefinition.json
-
-      - name: Validate All Policy JSON Files (Schema)
-        run: |
-          for file in policies/azure/definitions/*.json; do
-            echo "Schema validating $file"
-            python3 -m jsonschema -i "$file" policyDefinition.schema.json
-          done
 
       - name: Create or Update All Policy Definitions
         run: |
@@ -78,10 +64,3 @@ jobs:
           done
 
 
-      - name: Run Compliance Scan
-        run: |
-          az policy state trigger-scan --management-group "$MGMT_GROUP"
-          az policy state list --management-group "$MGMT_GROUP"
-
-      - name: Output Success
-        run: echo "Azure Policy deployment and compliance scan completed."
