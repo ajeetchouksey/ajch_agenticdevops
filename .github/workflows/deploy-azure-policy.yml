@@ -36,18 +36,24 @@ jobs:
             policy_name=$(basename "$file" .json)
             echo "Processing $policy_name"
             az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP" || true
+            rules_file="policies/azure/definitions/${policy_name}.rules.json"
             if [ $? -ne 0 ]; then
               echo "Creating $policy_name"
               az policy definition create \
                 --name "$policy_name" \
-                --definition @"$file" \
-                --mode All \
+                --display-name "Allowed locations" \
+                --description "This policy enables you to restrict the locations your organization can specify when deploying resources. Use to enforce your geo-compliance requirements. Excludes resource groups, Microsoft.AzureActiveDirectory/b2cDirectories, and resources that use the 'global' region." \
+                --mode Indexed \
+                --rules @$rules_file \
                 --management-group "$MGMT_GROUP"
             else
               echo "Updating $policy_name"
               az policy definition update \
                 --name "$policy_name" \
-                --definition @"$file" \
+                --display-name "Allowed locations" \
+                --description "This policy enables you to restrict the locations your organization can specify when deploying resources. Use to enforce your geo-compliance requirements. Excludes resource groups, Microsoft.AzureActiveDirectory/b2cDirectories, and resources that use the 'global' region." \
+                --mode Indexed \
+                --rules @$rules_file \
                 --management-group "$MGMT_GROUP"
             fi
           done
