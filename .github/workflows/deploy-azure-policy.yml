@@ -40,12 +40,15 @@ jobs:
               echo "ERROR: Rules file $rules_file not found. Skipping $policy_name."
               continue
             fi
+            # Extract displayName and description from the policy JSON
+            display_name=$(jq -r '.displayName' "$file")
+            description=$(jq -r '.description' "$file")
             if ! az policy definition show --name "$policy_name" --management-group "$MGMT_GROUP" > /dev/null 2>&1; then
               echo "Creating $policy_name"
               az policy definition create \
                 --name "$policy_name" \
-                --display-name "Allowed locations" \
-                --description "This policy enables you to restrict the locations your organization can specify when deploying resources. Use to enforce your geo-compliance requirements. Excludes resource groups, Microsoft.AzureActiveDirectory/b2cDirectories, and resources that use the 'global' region." \
+                --display-name "$display_name" \
+                --description "$description" \
                 --mode Indexed \
                 --rules @$rules_file \
                 --management-group "$MGMT_GROUP"
@@ -53,8 +56,8 @@ jobs:
               echo "Updating $policy_name"
               az policy definition update \
                 --name "$policy_name" \
-                --display-name "Allowed locations" \
-                --description "This policy enables you to restrict the locations your organization can specify when deploying resources. Use to enforce your geo-compliance requirements. Excludes resource groups, Microsoft.AzureActiveDirectory/b2cDirectories, and resources that use the 'global' region." \
+                --display-name "$display_name" \
+                --description "$description" \
                 --mode Indexed \
                 --rules @$rules_file \
                 --management-group "$MGMT_GROUP"
