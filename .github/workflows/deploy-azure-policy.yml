@@ -77,7 +77,7 @@ jobs:
             az policy assignment create \
               --name "assign-$policy_name" \
               --policy "$policy_name" \
-              --management-group "$MGMT_GROUP" || echo "Assignment for $policy_name may already exist."
+              --scope "/providers/Microsoft.Management/managementGroups/$MGMT_GROUP" || echo "Assignment for $policy_name may already exist."
           done
 
 
