@@ -1,0 +1,185 @@
+name: Deploy Azure Infrastructure
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      resource_group_name:
+        description: 'Azure Resource Group Name'
+        required: true
+        default: 'AI_Agent_RG'
+        type: string
+      location:
+        description: 'Azure Location'
+        required: true
+        default: 'eastus'
+        type: choice
+        options:
+          - eastus
+          - westus2
+          - westeurope
+          - southeastasia
+          - centralus
+      vm_name:
+        description: 'Virtual Machine Name'
+        required: true
+        default: 'MyAIInfraVM'
+        type: string
+      vm_size:
+        description: 'Virtual Machine Size'
+        required: true
+        default: 'Standard_DS1_v2'
+        type: choice
+        options:
+          - Standard_DS1_v2
+          - Standard_B1s
+          - Standard_B2s
+          - Standard_D2s_v3
+      admin_username:
+        description: 'VM Admin Username'
+        required: true
+        default: 'azureuser'
+        type: string
+      enable_ai_decisions:
+        description: 'Enable AI-driven decisions'
+        required: false
+        default: true
+        type: boolean
+  
+  # Trigger on push to specific paths
+  push:
+    paths:
+      - 'ai-agents/infra_deployment_agent/**'
+      - '.github/workflows/deploy-azure-infrastructure.yml'
+    branches:
+      - main
+
+# Required permissions
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    environment: azure-deployment
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ai-agents/infra_deployment_agent/requirements.txt
+      
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Validate Azure Connection
+        run: |
+          az account show
+          echo "Azure subscription validated"
+      
+      - name: Set Environment Variables
+        run: |
+          echo "AZURE_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          echo "RESOURCE_GROUP_NAME=${{ github.event.inputs.resource_group_name || 'AI_Agent_RG' }}" >> $GITHUB_ENV
+          echo "LOCATION=${{ github.event.inputs.location || 'eastus' }}" >> $GITHUB_ENV
+          echo "VM_NAME=${{ github.event.inputs.vm_name || 'MyAIInfraVM' }}" >> $GITHUB_ENV
+          echo "VM_SIZE=${{ github.event.inputs.vm_size || 'Standard_DS1_v2' }}" >> $GITHUB_ENV
+          echo "ADMIN_USERNAME=${{ github.event.inputs.admin_username || 'azureuser' }}" >> $GITHUB_ENV
+          
+          # Set OpenAI API key if AI decisions are enabled
+          if [ "${{ github.event.inputs.enable_ai_decisions }}" = "true" ]; then
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+          fi
+      
+      - name: Pre-deployment Validation
+        run: |
+          echo "=== Pre-deployment Configuration ==="
+          echo "Resource Group: $RESOURCE_GROUP_NAME"
+          echo "Location: $LOCATION"
+          echo "VM Name: $VM_NAME"
+          echo "VM Size: $VM_SIZE"
+          echo "Admin Username: $ADMIN_USERNAME"
+          echo "AI Decisions Enabled: ${{ github.event.inputs.enable_ai_decisions || 'false' }}"
+          echo "=================================="
+      
+      - name: Deploy Azure Infrastructure
+        id: deploy
+        run: |
+          echo "Starting Azure infrastructure deployment..."
+          cd ai-agents/infra_deployment_agent
+          python azure_infra_deploy.py
+        env:
+          # Sensitive data from secrets
+          VM_ADMIN_PASSWORD: ${{ secrets.VM_ADMIN_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      
+      - name: Post-deployment Verification
+        if: success()
+        run: |
+          echo "=== Deployment Verification ==="
+          
+          # Check if resource group was created
+          if az group show --name "$RESOURCE_GROUP_NAME" --output table; then
+            echo "✅ Resource group '$RESOURCE_GROUP_NAME' exists"
+          else
+            echo "❌ Resource group '$RESOURCE_GROUP_NAME' not found"
+            exit 1
+          fi
+          
+          # List resources in the resource group
+          echo "Resources in $RESOURCE_GROUP_NAME:"
+          az resource list --resource-group "$RESOURCE_GROUP_NAME" --output table
+          
+          echo "================================="
+      
+      - name: Upload Deployment Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-logs-${{ github.run_number }}
+          path: |
+            ai-agents/infra_deployment_agent/infra_deployment.log
+          retention-days: 30
+      
+      - name: Cleanup on Failure
+        if: failure()
+        run: |
+          echo "=== Cleanup on Failure ==="
+          echo "Deployment failed. Consider manual cleanup if needed."
+          echo "Resource Group: $RESOURCE_GROUP_NAME"
+          echo "Location: $LOCATION"
+          
+          # Optional: Add automatic cleanup logic here
+          # Be careful with automatic deletion in production
+          
+          echo "Check the deployment logs for detailed error information."
+      
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "=== Deployment Summary ==="
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Status: ${{ job.status }}"
+          
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "🎉 Infrastructure deployment completed successfully!"
+            echo "Resource Group: $RESOURCE_GROUP_NAME"
+            echo "Location: $LOCATION"
+          else
+            echo "💥 Infrastructure deployment encountered issues."
+            echo "Please check the logs for details."
+          fi
+          echo "=============================="
