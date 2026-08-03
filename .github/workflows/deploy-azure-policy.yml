@@ -16,7 +16,7 @@ jobs:
       MGMT_GROUP: ajch_mgt_grp_01
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Azure Login (Service Principal)
         uses: azure/login@v2
